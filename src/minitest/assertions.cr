@@ -1,9 +1,6 @@
 module Minitest
-  class Skip < Exception
-  end
-
-  class Assertion < Exception
-  end
+  class Assertion < Exception; end
+  class Skip < Exception; end
 
   module Assertions
     def assert(actual, message = nil)

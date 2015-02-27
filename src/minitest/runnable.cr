@@ -1,7 +1,6 @@
 module Minitest
   class Runnable
-    @@runnables = [Runnable]
-    @@runnables.clear
+    @@runnables = [] of Runnable.class
 
     def self.runnables
       @@runnables
@@ -12,7 +11,13 @@ module Minitest
     end
 
     macro def self.run(reporter) : Nil
-      klass = {{ (@class_name.ends_with?(":Class") ? @class_name[0..-7].id : @class_name).id }}
+      klass = {{
+        if @class_name.ends_with?(":Class")
+          @class_name[0..-7].id
+        else
+          @class_name
+        end.id
+      }}
       klass.new(reporter).run_tests
       nil
     end

@@ -1,5 +1,6 @@
 require "../minitest"
 
+# TODO: push to crystal (?)
 def exit(code : Bool)
   exit code ? 0 : -1
 end

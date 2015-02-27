@@ -8,7 +8,7 @@ module Minitest
 
     def initialize
       @assertions = 0
-      @failures = [] of Assertion | UnexpectedError
+      @failures = [] of Assertion | Skip | UnexpectedError
     end
 
     def passed?
