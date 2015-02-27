@@ -16,7 +16,8 @@ class MyTest < Minitest::Test
   end
 
   def test_something
-    p @var # => "something"
+    refute @var.nil?
+    assert @var == "something"
   end
 end
 ```
