@@ -10,6 +10,10 @@ class RunnableTest < Minitest::Test
     puts "\n"
   end
 
+  def test_truthy
+    assert { helper == "help you" }
+  end
+
   def test_something
     puts "something"
     puts "@var = #{@myvar}"

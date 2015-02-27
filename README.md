@@ -29,13 +29,12 @@ end
 - [x] extract the list of test methods from test suites
 - [ ] shuffle test methods
 - [x] run the test methods
-- [x] run setup / teardown methods before/after each test
+- [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
 - [ ] after run hooks
 - [ ] assertions
 - [ ] refutations
-- [ ] skip
-- [ ] flunk
+- [ ] skip / flunk
 - [ ] reporter: composite (dispatches to linked reporters)
 - [ ] reporter: progress
 - [ ] reporter: verbose progress

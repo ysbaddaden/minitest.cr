@@ -35,12 +35,21 @@ module Minitest
 
     # TODO: shuffle test methods
     macro def run_tests : Nil
-      {{ @type.methods.map(&.name.stringify).select(&.starts_with?("test_")).map { |m| "run_one { #{m.id} }" }.join("\n").id }}
+      {{
+        @type.methods
+          .map(&.name.stringify)
+          .select(&.starts_with?("test_"))
+          .map { |m| "run_one { #{m.id} }" }
+          .join("\n")
+          .id
+      }}
       nil
     end
 
     def run_one
-      capture_exception do
+      result = Result.new
+
+      capture_exception(result) do
         before_setup
         setup
         after_setup
@@ -48,18 +57,22 @@ module Minitest
         yield
       end
 
-      capture_exception { before_teardown }
-      capture_exception { teardown }
-      capture_exception { after_teardown }
+      capture_exception(result) { before_teardown }
+      capture_exception(result) { teardown }
+      capture_exception(result) { after_teardown }
+
+      reporter.record(result)
     end
 
-    def capture_exception
+    def capture_exception(result)
       begin
         yield
       rescue ex : Assertion
-        self.class.failures << ex
+        result.failures << ex
+      rescue ex : Skip
+        result.skipped = ex.message
       rescue ex : Exception
-        self.class.failures << UnexpectedError.new(ex)
+        result.failures << UnexpectedError.new(ex)
       end
     end
 

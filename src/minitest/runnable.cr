@@ -11,10 +11,15 @@ module Minitest
       Minitest::Runnable.runnables << self
     end
 
-    macro def self.run : Nil
+    macro def self.run(reporter) : Nil
       klass = {{ (@class_name.ends_with?(":Class") ? @class_name[0..-7].id : @class_name).id }}
-      klass.new.run_tests
+      klass.new(reporter).run_tests
       nil
+    end
+
+    getter :reporter
+
+    def initialize(@reporter)
     end
 
     def run_tests
