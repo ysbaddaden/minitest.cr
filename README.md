@@ -33,13 +33,14 @@ end
 - [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
 - [ ] after run hooks
-- [ ] assertions
-- [ ] refutations
-- [ ] skip / flunk
-- [ ] reporter: composite (dispatches to linked reporters)
-- [ ] reporter: progress
+- [.] assertions
+- [.] refutations
+- [x] skip / flunk
+- [x] reporter: composite (dispatches to linked reporters)
+- [x] reporter: progress
 - [ ] reporter: verbose progress
-- [ ] reporter: summary
+- [x] reporter: summary
+- [ ] reporter: colors
 
 ## Requirements
 

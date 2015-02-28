@@ -115,7 +115,7 @@ module Minitest
         result.failures.each do |exception|
           if exception.is_a?(Assertion)
             print "  #{i + 1}) Failure: #{exception.message}\n"
-          else
+          elsif exception.is_a?(UnexpectedError)
             print "  #{i + 1}) #{exception.class}: exception.message}\n"
             print "      #{exception.backtrace.join("\n      ")}\n\n"
           end
@@ -123,7 +123,7 @@ module Minitest
       end
 
       if skips > 0
-        print "There are skipped tests\n"
+        print "\nThere are skipped tests.\n"
       end
     end
   end

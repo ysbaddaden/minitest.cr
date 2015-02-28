@@ -67,10 +67,8 @@ module Minitest
     def capture_exception(result)
       begin
         yield
-      rescue ex : Assertion
+      rescue ex : Assertion | Skip
         result.failures << ex
-      rescue ex : Skip
-        result.skipped = ex.message
       rescue ex : Exception
         result.failures << UnexpectedError.new(ex)
       end

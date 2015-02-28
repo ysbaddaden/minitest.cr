@@ -4,7 +4,7 @@ require "./minitest/test"
 
 module Minitest
   class Result
-    property :assertions, :skipped, :failures
+    property :assertions, :failures
 
     def initialize
       @assertions = 0
@@ -16,7 +16,7 @@ module Minitest
     end
 
     def skipped?
-      !!skipped
+      failures.any? { |f| f.is_a?(Skip) }
     end
 
     def result_code
