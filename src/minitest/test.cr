@@ -39,15 +39,17 @@ module Minitest
         @type.methods
           .map(&.name.stringify)
           .select(&.starts_with?("test_"))
-          .map { |m| "run_one { #{m.id} }" }
+          #.shuffle
+          .map { |m| "run_one(#{m}) { #{m.id} }" }
           .join("\n")
           .id
       }}
       nil
     end
 
-    def run_one
-      result = Result.new
+    def run_one(name)
+      result = Result.new(self.class.to_s, name)
+      start_time = Time.now
 
       capture_exception(result) do
         before_setup
@@ -61,6 +63,7 @@ module Minitest
       capture_exception(result) { teardown }
       capture_exception(result) { after_teardown }
 
+      result.time = Time.now - start_time
       reporter.record(result)
     end
 

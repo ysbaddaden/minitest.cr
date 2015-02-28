@@ -29,6 +29,7 @@ end
 - [x] run all test suites at exit
 - [x] extract the list of test methods from test suites
 - [ ] shuffle test methods
+- [ ] filter test methods to run
 - [x] run the test methods
 - [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
@@ -38,9 +39,10 @@ end
 - [x] skip / flunk
 - [x] reporter: composite (dispatches to linked reporters)
 - [x] reporter: progress
-- [ ] reporter: verbose progress
+- [x] reporter: verbose progress
 - [x] reporter: summary
 - [ ] reporter: colors
+- [ ] command line options (--verbose, -n PATTERN)
 
 ## Requirements
 

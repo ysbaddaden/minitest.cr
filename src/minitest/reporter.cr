@@ -1,5 +1,10 @@
 module Minitest
   class AbstractReporter
+    getter! :options
+
+    def initialize(@options)
+    end
+
     def start
     end
 
@@ -45,10 +50,18 @@ module Minitest
   end
 
   # TODO: colorize
-  # TODO: verbose mode
   class ProgressReporter < AbstractReporter
     def record(result)
+      if options[:verbose]
+        if time = result.time
+          LibC.printf "%s#%s = %.03f s = ", result.class_name, result.name, result.time.to_f
+        else
+          LibC.printf "%s#%s = ? = ", result.class_name, result.name
+        end
+      end
+
       print result.result_code
+      puts if options[:verbose]
     end
   end
 
@@ -56,7 +69,7 @@ module Minitest
   class StatisticsReporter < AbstractReporter
     getter :count, :results, :start_time, :total_time, :failures, :errors, :skips
 
-    def initialize
+    def initialize(options)
       super
 
       @results = [] of Minitest::Result
@@ -64,9 +77,7 @@ module Minitest
       @failures = 0
       @errors = 0
       @skips = 0
-
-      # tell compiler about variable type to avoid a nilable
-      @start_time :: Time
+      @start_time :: Time # avoid nilable
     end
 
     def start

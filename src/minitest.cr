@@ -4,11 +4,13 @@ require "./minitest/test"
 
 module Minitest
   class Result
-    property :assertions, :failures
+    getter :assertions, :failures, :class_name, :name
+    property :time
 
-    def initialize
+    def initialize(@class_name, @name)
       @assertions = 0
       @failures = [] of Assertion | Skip | UnexpectedError
+      @time :: TimeSpan # avoid nilable
     end
 
     def passed?
@@ -31,10 +33,15 @@ module Minitest
     end
   end
 
+  # TODO: parse command line option --verbose
+  def self.options
+    @@options ||= { verbose: false }
+  end
+
   def self.run
     reporter = CompositeReporter.new
-    reporter << SummaryReporter.new
-    reporter << ProgressReporter.new
+    reporter << SummaryReporter.new(options)
+    reporter << ProgressReporter.new(options)
     reporter.start
 
     Runnable.runnables.shuffle.each(&.run(reporter))
