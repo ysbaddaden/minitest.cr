@@ -15,7 +15,7 @@ module Minitest
     end
 
     def passed?
-      false
+      true
     end
   end
 
@@ -78,6 +78,7 @@ module Minitest
       @errors = 0
       @skips = 0
       @start_time :: Time # avoid nilable
+      @total_time :: TimeSpan # avoid nilable
     end
 
     def start
@@ -104,37 +105,42 @@ module Minitest
     end
 
     def passed?
-      failures + errors == 0
+      results.all?(&.skipped?)
     end
   end
 
-  # TODO: report origin of failures/errors (file, line, class, method)
+  # TODO: report origin of failures (file, line)
   class SummaryReporter < StatisticsReporter
     def report
       super
 
-      print "\n\nFinished in #{total_time}\n"
-      print "#{count} tests, #{failures} failures, #{errors} errors"
+      puts unless options[:verbose]
+      puts "\nFinished in #{total_time}, #{1.0 / total_time.to_f} runs/s"
+      puts
 
-      if skips > 0
-        print ", #{skips} skips\n\n"
-      else
-        print "\n\n"
-      end
+      aggregated_results = options[:verbose] ? results : results.reject(&.skipped?)
 
-      results.each_with_index do |result, i|
+      aggregated_results.each_with_index do |result, i|
+        loc = "#{result.class_name}##{result.name}"
+
         result.failures.each do |exception|
-          if exception.is_a?(Assertion)
-            print "  #{i + 1}) Failure: #{exception.message}\n"
-          elsif exception.is_a?(UnexpectedError)
-            print "  #{i + 1}) #{exception.class}: exception.message}\n"
-            print "      #{exception.backtrace.join("\n      ")}\n\n"
+          case exception
+          when Assertion
+            puts "  #{i + 1}) Failure:\n#{loc}:\n#{exception.message}"
+          when UnexpectedError
+            puts "  #{i + 1}) Error:\n#{loc}:\n#{exception.class}:"
+            puts "      #{exception.backtrace.join("\n      ")}"
+          when Skip
+            puts "  #{i + 1}) Skipped:\n#{loc}\n#{exception.message}"
           end
+          puts
         end
       end
 
-      if skips > 0
-        print "\nThere are skipped tests.\n"
+      puts "#{count} tests, #{failures} failures, #{errors} errors, #{skips} skips"
+
+      if skips > 0 && !options[:verbose]
+        puts "\nYou have skipped tests. Run with --verbose for details."
       end
     end
   end

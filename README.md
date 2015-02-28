@@ -42,7 +42,7 @@ end
 - [x] reporter: verbose progress
 - [x] reporter: summary
 - [ ] reporter: colors
-- [ ] command line options (--verbose, -n PATTERN)
+- [x] command line options (--verbose, -n PATTERN)
 
 ## Requirements
 

@@ -6,6 +6,6 @@ def exit(code : Bool)
 end
 
 at_exit do
-  exit_code = Minitest.run
+  exit_code = Minitest.run(ARGV)
   exit exit_code
 end
