@@ -31,7 +31,7 @@ module Minitest
     end
   end
 
-  macro def self.run : Bool
+  def self.run
     reporter = CompositeReporter.new
     reporter << SummaryReporter.new
     reporter << ProgressReporter.new
