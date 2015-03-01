@@ -5,8 +5,6 @@ require "./minitest/runnable"
 require "./minitest/test"
 
 module Minitest
-  VERSION = {{ `cat VERSION`.stringify }}
-
   def self.options
     @@options ||= { verbose: false }
   end
