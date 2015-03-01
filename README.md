@@ -17,7 +17,7 @@ class MyTest < Minitest::Test
 
   def test_something
     refute @var.nil?
-    assert @var == "something"
+    assert_equal "something", @var
   end
 end
 ```
@@ -28,7 +28,7 @@ end
 - [x] shuffle test suites
 - [x] run all test suites at exit
 - [x] extract the list of test methods from test suites
-- [ ] shuffle test methods
+- [.] shuffle test methods
 - [ ] filter test methods to run
 - [x] run the test methods
 - [x] run setup / teardown methods before / after each test
@@ -41,8 +41,8 @@ end
 - [x] reporter: progress
 - [x] reporter: verbose progress
 - [x] reporter: summary
-- [ ] reporter: colors
-- [x] command line options (--verbose, -n PATTERN)
+- [x] reporter: colors
+- [.] command line options (--verbose, -n PATTERN)
 
 ## Requirements
 
