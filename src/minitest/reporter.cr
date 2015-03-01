@@ -1,3 +1,5 @@
+require "colorize"
+
 module Minitest
   class AbstractReporter
     getter! :options
@@ -35,9 +37,7 @@ module Minitest
     end
 
     def record(result)
-      reporters.each do |reporter|
-        reporter.record(result)
-      end
+      reporters.each(&.record(result))
     end
 
     def report
@@ -49,7 +49,6 @@ module Minitest
     end
   end
 
-  # TODO: colorize
   class ProgressReporter < AbstractReporter
     def record(result)
       if options[:verbose]
@@ -60,12 +59,17 @@ module Minitest
         end
       end
 
-      print result.result_code
+      if result.passed?
+        print result.result_code.colorize(:green)
+      elsif result.skipped?
+        print result.result_code.colorize(:yellow)
+      else
+        print ColorizedObject.new(result.result_code).back(:red)
+      end
       puts if options[:verbose]
     end
   end
 
-  # TODO: colorize
   class StatisticsReporter < AbstractReporter
     getter :count, :results, :start_time, :total_time, :failures, :errors, :skips
 
@@ -126,18 +130,22 @@ module Minitest
         result.failures.each do |exception|
           case exception
           when Assertion
-            puts "  #{i + 1}) Failure:\n#{loc}:\n#{exception.message}"
+            puts "  #{i + 1}) Failure:".colorize(:red)
+            puts "#{loc}:\n#{exception.message}"
           when UnexpectedError
-            puts "  #{i + 1}) Error:\n#{loc}:\n#{exception.class}:"
+            puts "  #{i + 1}) Error:".colorize(:red)
+            puts "#{loc}:\n#{exception.class}:"
             puts "      #{exception.backtrace.join("\n      ")}"
           when Skip
-            puts "  #{i + 1}) Skipped:\n#{loc}\n#{exception.message}"
+            puts "  #{i + 1}) Skipped:".colorize(:yellow)
+            puts "#{loc}:\n#{exception.message}"
           end
           puts
         end
       end
 
       puts "#{count} tests, #{failures} failures, #{errors} errors, #{skips} skips"
+        .colorize(passed? ? :green : :red)
 
       if skips > 0 && !options[:verbose]
         puts "\nYou have skipped tests. Run with --verbose for details."
