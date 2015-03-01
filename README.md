@@ -27,6 +27,7 @@ end
 - [x] keep a list of classes inheriting Minitest::Test (test suites)
 - [x] shuffle test suites
 - [x] run all test suites at exit
+- [x] run test suites in parallel
 - [x] extract the list of test methods from test suites
 - [.] shuffle test methods
 - [ ] filter test methods to run
@@ -42,7 +43,7 @@ end
 - [x] reporter: verbose progress
 - [x] reporter: summary
 - [x] reporter: colors
-- [.] command line options (--verbose, -n PATTERN)
+- [.] command line options (--verbose, -n PATTERN, --parallel THREADS)
 
 ## Requirements
 
