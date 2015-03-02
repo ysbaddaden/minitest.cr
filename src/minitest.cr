@@ -43,7 +43,7 @@ module Minitest
         options.verbose = true
       end
 
-      opts.on("-p THREADS", "--parallel THREADS", "Show progress processing files.") do |threads|
+      opts.on("-p THREADS", "--parallel THREADS", "Parallelize runs.") do |threads|
         options.threads = threads.to_i
       end
 
