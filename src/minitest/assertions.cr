@@ -26,6 +26,7 @@ module Minitest
       refute yield, message
     end
 
+
     def assert_equal(expected, actual, message = nil)
       msg = -> { message || "Expected #{expected.inspect} but got #{actual.inspect}" }
       assert expected == actual, msg
@@ -35,6 +36,28 @@ module Minitest
       msg = -> { message || "Expected #{expected.inspect} to not be equal to #{actual.inspect}" }
       assert expected != actual, msg
     end
+
+
+    def assert_match(pattern : Regex, actual, message = nil)
+      msg = -> { message || "Expected #{pattern.inspect} to match #{actual.inspect}" }
+      assert actual =~ pattern, msg
+    end
+
+    def assert_match(pattern, actual, message = nil)
+      msg = -> { message || "Expected #{pattern.inspect} to match #{actual.inspect}" }
+      assert actual =~ Regex.new(Regex.escape(pattern.to_s)), msg
+    end
+
+    def refute_match(pattern : Regex, actual, message = nil)
+      msg = -> { message || "Expected #{pattern.inspect} to not match #{actual.inspect}" }
+      refute actual =~ pattern, msg
+    end
+
+    def refute_match(pattern, actual, message = nil)
+      msg = -> { message || "Expected #{pattern.inspect} to not match #{actual.inspect}" }
+      refute actual =~ Regex.new(Regex.escape(pattern.to_s)), msg
+    end
+
 
     def assert_raises(message = nil : String)
       begin
@@ -56,6 +79,7 @@ module Minitest
         raise Minitest::Assertion.new("Expected #{ {{klass.id}} } but nothing was raised")
       end
     end
+
 
     def skip(message = "")
       raise Minitest::Skip.new(message)

@@ -23,6 +23,7 @@ class AssertionsTest < Minitest::Test
     assert_raises(Minitest::Assertion) { refute { true } }
   end
 
+
   def test_assert_equal
     assert_equal 1, 1
     assert_equal "abcd", "abcd"
@@ -35,6 +36,28 @@ class AssertionsTest < Minitest::Test
     refute_equal 1, "abcd"
     assert_raises(Minitest::Assertion) { refute_equal 1, 1 }
   end
+
+
+  def test_assert_match_with_regex
+    assert_match /test/, "this is a test"
+    assert_raises(Minitest::Assertion) { assert_match /foo/, "bar baz" }
+  end
+
+  def test_assert_match_with_string
+    assert_match "this", "this is a test"
+    assert_raises(Minitest::Assertion) { assert_match "foo", "bar baz" }
+  end
+
+  def test_refute_match_with_regex
+    refute_match /foo/, "this is a test"
+    assert_raises(Minitest::Assertion) { refute_match /foo/, "foo bar" }
+  end
+
+  def test_refute_match_with_string
+    refute_match "foo", "this is a test"
+    assert_raises(Minitest::Assertion) { refute_match "bar", "foo bar baz" }
+  end
+
 
   def test_assert_raises
     ex = assert_raises { raise "error message" }
