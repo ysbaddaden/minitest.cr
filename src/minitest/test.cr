@@ -39,6 +39,11 @@ module Minitest
     end
 
     def run_one(name)
+      case pattern = reporter.options.pattern
+      when Regex  then return unless name =~ pattern
+      when String then return unless name == pattern
+      end
+
       result = Result.new(self.class.to_s, name)
       start_time = Time.now
 

@@ -8,10 +8,19 @@ require "./minitest/test"
 module Minitest
   class Options
     property :verbose, :threads
+    getter :pattern
 
     def initialize
       @verbose = false
       @threads = 1
+    end
+
+    def pattern=(pattern)
+      if pattern =~ %r(\A/(.+?)/\Z)
+        @pattern = Regex.new($1)
+      else
+        @pattern = pattern
+      end
     end
   end
 
@@ -30,18 +39,22 @@ module Minitest
         exit
       end
 
+      opts.on("-v", "--verbose", "Show progress processing files.") do
+        options.verbose = true
+      end
+
       opts.on("-p THREADS", "--parallel THREADS", "Show progress processing files.") do |threads|
         options.threads = threads.to_i
       end
 
-      opts.on("-v", "--verbose", "Show progress processing files.") do
-        options.verbose = true
+      opts.on("-n PATTERN", "--name PATTERN", "Filter run on /pattern/ or string.") do |pattern|
+        options.pattern = pattern
       end
     end
   end
 
   def self.reporter
-    @@reporter ||= CompositeReporter.new.tap do |reporter|
+    @@reporter ||= CompositeReporter.new(options).tap do |reporter|
       reporter << SummaryReporter.new(options)
       reporter << ProgressReporter.new(options)
     end

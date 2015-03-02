@@ -53,7 +53,7 @@ end
 - [x] run test suites in parallel
 - [x] extract the list of test methods from test suites
 - [x] shuffle test methods
-- [ ] filter test methods to run
+- [x] filter test methods to run
 - [x] run the test methods
 - [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
@@ -66,7 +66,7 @@ end
 - [x] reporter: verbose progress
 - [x] reporter: summary
 - [x] reporter: colors
-- [.] command line options (--verbose, -n PATTERN, --parallel THREADS)
+- [x] command line options (--verbose, -n PATTERN, --parallel THREADS)
 
 ## Requirements
 

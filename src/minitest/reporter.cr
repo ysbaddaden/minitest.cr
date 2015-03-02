@@ -24,7 +24,7 @@ module Minitest
   class CompositeReporter < AbstractReporter
     getter :reporters
 
-    def initialize
+    def initialize(@options)
       @reporters = [] of AbstractReporter
     end
 
