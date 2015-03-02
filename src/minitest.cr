@@ -5,30 +5,20 @@ require "./minitest/reporter"
 require "./minitest/runnable"
 require "./minitest/test"
 
-module Enumerable(T)
-  def each_slice(count)
-    count = count.to_i
-    result = [] of Array(T)
-    ary :: Array(T)
-
-    each_with_index do |e, i|
-      if i % count == 0
-        ary = [] of T
-        result << ary
-      end
-
-      ary << e
-    end
-
-    result
-  end
-end
-
 module Minitest
-  @@threads = 1
+  class Options
+    property :verbose, :threads
+
+    def initialize
+      @verbose = false
+      @threads = 1
+    end
+  end
+
+  @@mutex = Mutex.new
 
   def self.options
-    @@options ||= { verbose: false }
+    @@options ||= Options.new
   end
 
   def self.process_args(args)
@@ -41,12 +31,11 @@ module Minitest
       end
 
       opts.on("-p THREADS", "--parallel THREADS", "Show progress processing files.") do |threads|
-        value = threads.to_i
-        @@threads = value if value > 0
+        options.threads = threads.to_i
       end
 
       opts.on("-v", "--verbose", "Show progress processing files.") do
-        options[:verbose] = true
+        options.verbose = true
       end
     end
   end
@@ -67,13 +56,19 @@ module Minitest
     reporter.start
 
     suites = Runnable.runnables.shuffle
-    n = suites.size < @@threads ? suites.size : @@threads
-    partitions = suites.each_slice((suites.size / n.to_f).ceil)
+    count = suites.size < options.threads ? suites.size : options.threads
 
-    threads = partitions.map do |partition|
-      Thread.new { partition.each(&.run(reporter)) }
+    threads = (0 ... count).map do
+      Thread.new do
+        loop do
+          if suite = @@mutex.synchronize { suites.pop unless suites.empty? }
+            suite.run(reporter)
+          else
+            break
+          end
+        end
+      end
     end
-
     threads.each(&.join)
 
     reporter.report

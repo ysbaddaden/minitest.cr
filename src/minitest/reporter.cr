@@ -51,7 +51,7 @@ module Minitest
 
   class ProgressReporter < AbstractReporter
     def record(result)
-      if options[:verbose]
+      if options.verbose
         if time = result.time
           LibC.printf "%s#%s = %.03f s = ", result.class_name, result.name, result.time.to_f
         else
@@ -66,7 +66,7 @@ module Minitest
       else
         print ColorizedObject.new(result.result_code).back(:red)
       end
-      puts if options[:verbose]
+      puts if options.verbose
     end
   end
 
@@ -118,11 +118,11 @@ module Minitest
     def report
       super
 
-      puts unless options[:verbose]
+      puts unless options.verbose
       puts "\nFinished in #{total_time}, #{1.0 / total_time.to_f} runs/s"
       puts
 
-      aggregated_results = options[:verbose] ? results : results.reject(&.skipped?)
+      aggregated_results = options.verbose ? results : results.reject(&.skipped?)
 
       aggregated_results.each_with_index do |result, i|
         loc = "#{result.class_name}##{result.name}"
@@ -147,7 +147,7 @@ module Minitest
       puts "#{count} tests, #{failures} failures, #{errors} errors, #{skips} skips"
         .colorize(passed? ? :green : :red)
 
-      if skips > 0 && !options[:verbose]
+      if skips > 0 && !options.verbose
         puts "\nYou have skipped tests. Run with --verbose for details."
       end
     end
