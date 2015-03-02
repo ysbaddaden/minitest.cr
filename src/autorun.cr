@@ -1,4 +1,4 @@
-require "../minitest"
+require "./minitest"
 
 # TODO: push to crystal (?)
 def exit(code : Bool)

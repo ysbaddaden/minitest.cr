@@ -1,4 +1,4 @@
-require "../src/minitest/autorun"
+require "../src/autorun"
 
 class LifecycleHooksTest < Minitest::Test
   getter :state_was

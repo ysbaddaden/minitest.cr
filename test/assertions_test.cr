@@ -1,4 +1,4 @@
-require "../src/minitest/autorun"
+require "../src/autorun"
 
 class AssertionsTest < Minitest::Test
   class Failure < Exception; end
