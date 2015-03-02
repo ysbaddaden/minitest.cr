@@ -59,6 +59,20 @@ class AssertionsTest < Minitest::Test
   end
 
 
+  def test_assert_empty
+    assert_empty [] of Int32
+    assert_empty({} of Int32 => Int32)
+    assert_raises(Minitest::Assertion) { assert_empty([1, 2, 3]) }
+  end
+
+  def test_refute_empty
+    refute_empty [1, 2, 3]
+    refute_empty({ 1 => 2, 3 => 4 })
+    assert_raises(Minitest::Assertion) { refute_empty([] of Int32) }
+    #assert_raises(Minitest::Assertion) { refute_empty({} of Int32 => Int32) }
+  end
+
+
   def test_assert_raises
     ex = assert_raises { raise "error message" }
     assert_equal "error message", ex.message

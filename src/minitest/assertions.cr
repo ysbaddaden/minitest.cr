@@ -2,6 +2,13 @@ module Minitest
   class Assertion < Exception; end
   class Skip < Exception; end
 
+  # TODO: assert_includes / refute_includes
+  # TODO: assert_in_delta / refute_in_delta
+  # TODO: assert_in_epsilon / refute_in_epsilon
+  # TODO: assert_nil / refute_nil
+  # TODO: assert_output / refute_output
+  # TODO: assert_same / refute_same
+  # TODO: assert_silent / refute_silent
   module Assertions
     def assert(actual, message = nil)
       return true if actual
@@ -56,6 +63,17 @@ module Minitest
     def refute_match(pattern, actual, message = nil)
       msg = -> { message || "Expected #{pattern.inspect} to not match #{actual.inspect}" }
       refute actual =~ Regex.new(Regex.escape(pattern.to_s)), msg
+    end
+
+
+    def assert_empty(actual, message = nil)
+      msg = -> { message || "Expected #{actual.inspect} to be empty" }
+      assert actual.empty?, msg
+    end
+
+    def refute_empty(actual, message = nil)
+      msg = -> { message || "Expected #{actual.inspect} to not be empty" }
+      refute actual.empty?, msg
     end
 
 
