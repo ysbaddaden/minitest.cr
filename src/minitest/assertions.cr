@@ -33,12 +33,8 @@ module Minitest
     getter :exception
 
     def initialize(@exception)
-      super "#{class_name}: #{exception.message}"
+      super "#{exception.__minitest_class_name}: #{exception.message}"
       @file = exception.file
-    end
-
-    def class_name
-      exception.__minitest_class_name
     end
 
     def backtrace

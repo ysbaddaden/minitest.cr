@@ -25,13 +25,12 @@ module Minitest
     include LifecycleHooks
     include Assertions
 
-    # TODO: shuffle test methods
     macro def run_tests : Nil
       {{
         @type.methods
           .map(&.name.stringify)
           .select(&.starts_with?("test_"))
-          #.shuffle
+          .shuffle
           .map { |m| "run_one(#{m}) { #{m.id} }" }
           .join("\n")
           .id

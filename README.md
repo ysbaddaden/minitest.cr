@@ -52,7 +52,7 @@ end
 - [x] run all test suites at exit
 - [x] run test suites in parallel
 - [x] extract the list of test methods from test suites
-- [.] shuffle test methods
+- [x] shuffle test methods
 - [ ] filter test methods to run
 - [x] run the test methods
 - [x] run setup / teardown methods before / after each test
