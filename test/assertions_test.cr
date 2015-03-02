@@ -81,6 +81,20 @@ class AssertionsTest < Minitest::Test
     assert_equal "error message", ex.message
   end
 
+  def test_assert_raises_no_exception
+    ex = assert_raises(Minitest::Assertion) { assert_raises { true } }
+    assert_match "nothing was raised", ex.message
+  end
+
+  def test_assert_raises_unexpected_exception
+    ex = assert_raises(Minitest::Assertion) do
+      assert_raises(Failure) { raise "oops" }
+    end
+    assert_match "AssertionsTest::Failure", ex.message
+    assert_match "Exception", ex.message
+  end
+
+
   def test_skip
     ex = assert_raises(Minitest::Skip) { skip }
     assert_equal "", ex.message

@@ -131,14 +131,14 @@ module Minitest
           case exception
           when Assertion
             puts "  #{i + 1}) Failure:".colorize(:red)
-            puts "#{loc}:\n#{exception.message}"
+            puts "#{loc} [#{exception.location}]:\n#{exception.message}"
           when UnexpectedError
             puts "  #{i + 1}) Error:".colorize(:red)
-            puts "#{loc}:\n#{exception.message}"
-            puts "    #{exception.original_backtrace.join("\n    ")}"
+            puts "#{loc} [#{exception.location}]:\n#{exception.message}"
+            puts "    #{exception.backtrace.join("\n    ")}"
           when Skip
             puts "  #{i + 1}) Skipped:".colorize(:yellow)
-            puts "#{loc}:\n#{exception.message}"
+            puts "#{loc} [#{exception.location}]:\n#{exception.message}"
           end
           puts
         end
