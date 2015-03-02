@@ -21,11 +21,30 @@ module Minitest
     end
   end
 
+  # FIXME: hack to avoid https://github.com/manastech/crystal/issues/416
+  class ::Exception
+    macro def __minitest_class_name : String
+      {{ @class_name }}
+    end
+  end
+
   class UnexpectedError < Exception
     getter :exception
 
     def initialize(@exception)
-      super "Unexpected error: #{exception}"
+      super "#{original_class_name}: #{exception.message}"
+    end
+
+    def original_class_name
+      exception.__minitest_class_name
+    end
+
+    def original_backtrace
+      if pos = exception.backtrace.index { |f| f.index("@Minitest::Test#run_tests") }
+        exception.backtrace[0 ... pos]
+      else
+        exception.backtrace
+      end
     end
   end
 
@@ -78,7 +97,7 @@ module Minitest
     end
 
     def self.failures
-      @@failures ||= [] of Assertion | UnexpectedError
+      @@failures ||= [] of Assertion | Skip | UnexpectedError
     end
   end
 end

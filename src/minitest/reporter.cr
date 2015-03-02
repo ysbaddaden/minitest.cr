@@ -134,8 +134,8 @@ module Minitest
             puts "#{loc}:\n#{exception.message}"
           when UnexpectedError
             puts "  #{i + 1}) Error:".colorize(:red)
-            puts "#{loc}:\n#{exception.class}:"
-            puts "      #{exception.backtrace.join("\n      ")}"
+            puts "#{loc}:\n#{exception.message}"
+            puts "    #{exception.original_backtrace.join("\n    ")}"
           when Skip
             puts "  #{i + 1}) Skipped:".colorize(:yellow)
             puts "#{loc}:\n#{exception.message}"

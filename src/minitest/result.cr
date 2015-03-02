@@ -20,8 +20,8 @@ module Minitest
     def result_code
       return "." if passed?
       return "S" if skipped?
-      return "E" if failures.any?(&.is_a?(UnexpectedError))
-      return "F"
+      return "F" if failures.any?(&.is_a?(Assertion))
+      return "E"
     end
 
     def failure
