@@ -4,6 +4,7 @@ require "./minitest/result"
 require "./minitest/reporter"
 require "./minitest/runnable"
 require "./minitest/test"
+require "./minitest/spec"
 
 module Minitest
   class Options
