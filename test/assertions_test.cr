@@ -2,6 +2,7 @@ require "../src/autorun"
 
 class AssertionsTest < Minitest::Test
   class Failure < Exception; end
+  class Foo; end
 
   def test_assert
     assert true
@@ -38,6 +39,19 @@ class AssertionsTest < Minitest::Test
   end
 
 
+  def test_assert_same
+    foo = Foo.new
+    assert_same foo, foo
+    assert_raises(Minitest::Assertion) { assert_same Foo.new, foo }
+  end
+
+  def test_refute_same
+    foo = Foo.new
+    refute_same foo, Foo.new
+    assert_raises(Minitest::Assertion) { refute_same foo, foo }
+  end
+
+
   def test_assert_match_with_regex
     assert_match /test/, "this is a test"
     assert_raises(Minitest::Assertion) { assert_match /foo/, "bar baz" }
@@ -70,6 +84,69 @@ class AssertionsTest < Minitest::Test
     refute_empty({ 1 => 2, 3 => 4 })
     assert_raises(Minitest::Assertion) { refute_empty([] of Int32) }
     #assert_raises(Minitest::Assertion) { refute_empty({} of Int32 => Int32) }
+  end
+
+
+  def test_assert_nil
+    assert_nil nil
+    assert_raises(Minitest::Assertion) { assert_nil 1 }
+  end
+
+  def test_refute_nil
+    refute_nil 1
+    assert_raises(Minitest::Assertion) { refute_nil nil }
+  end
+
+
+  def test_assert_in_delta
+    assert_in_delta 0, 1, 1
+    assert_in_delta 0.0, 1.0 / 1000
+    assert_in_delta 0.0, 1.0 / 1000, 0.1
+    assert_raises(Minitest::Assertion) { assert_in_delta 0.0, 1.0 / 1000, 0.000001 }
+  end
+
+  def test_refute_in_delta
+    refute_in_delta 0, 2, 1
+    refute_in_delta 0.0, 1.0 / 1000, 0.0001
+    assert_raises(Minitest::Assertion) { refute_in_delta 0, 1, 1 }
+  end
+
+
+  def test_assert_in_epsilon
+    assert_in_epsilon 10000, 9991
+    assert_in_epsilon 9991, 10000
+    assert_in_epsilon 1.0, 1.001
+    assert_in_epsilon 1.001, 1.0
+
+    assert_in_epsilon 10000, 9999.1, 0.0001
+    assert_in_epsilon 9999.1, 10000, 0.0001
+    assert_in_epsilon 1.0, 1.0001, 0.0001
+    assert_in_epsilon 1.0001, 1.0, 0.0001
+
+    assert_in_epsilon -10000, -9991
+    assert_in_epsilon -1, -1
+
+    assert_raises(Minitest::Assertion) { assert_in_epsilon 10000, 9990 }
+  end
+
+  def test_refute_in_epsilon
+    refute_in_epsilon 10000, 9989
+    refute_in_epsilon 9991, 10001
+    refute_in_epsilon 1.0, 1.1
+    refute_in_epsilon 1.001, 1.003
+
+    assert_raises(Minitest::Assertion) { refute_in_epsilon 10000, 9990 }
+  end
+
+
+  def test_assert_includes
+    assert_includes [1, 2, 3], 2
+    assert_raises(Minitest::Assertion) { assert_includes [1, 2], 3 }
+  end
+
+  def test_refute_includes
+    refute_includes [1, 2, 3], 4
+    assert_raises(Minitest::Assertion) { refute_includes [1, 2], 2 }
   end
 
 

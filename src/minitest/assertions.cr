@@ -58,12 +58,7 @@ module Minitest
     include LocationFilter
   end
 
-  # TODO: assert_includes / refute_includes
-  # TODO: assert_in_delta / refute_in_delta
-  # TODO: assert_in_epsilon / refute_in_epsilon
-  # TODO: assert_nil / refute_nil
   # TODO: assert_output / refute_output
-  # TODO: assert_same / refute_same
   # TODO: assert_silent / refute_silent
   module Assertions
     def assert(actual, message = nil, file = __FILE__, line = __LINE__)
@@ -101,6 +96,23 @@ module Minitest
     end
 
 
+    def assert_same(expected, actual, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> {
+        message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
+        "to be the same as #{expected.inspect} (oid=#{expected.object_id})"
+      }
+      assert expected.same?(actual), msg, file, line
+    end
+
+    def refute_same(expected, actual, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> {
+        message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
+        "to not be the same as #{expected.inspect} (oid=#{expected.object_id})"
+      }
+      refute expected.same?(actual), msg, file, line
+    end
+
+
     def assert_match(pattern : Regex, actual, message = nil, file = __FILE__, line = __LINE__)
       msg = -> { message || "Expected #{pattern.inspect} to match #{actual.inspect}" }
       assert actual =~ pattern, msg, file, line
@@ -130,6 +142,50 @@ module Minitest
     def refute_empty(actual, message = nil, file = __FILE__, line = __LINE__)
       msg = -> { message || "Expected #{actual.inspect} to not be empty" }
       refute actual.empty?, msg, file, line
+    end
+
+
+    def assert_nil(actual, message = nil, file = __FILE__, line = __LINE__)
+      assert_equal nil, actual, message, file, line
+    end
+
+    def refute_nil(actual, message = nil, file = __FILE__, line = __LINE__)
+      refute_equal nil, actual, message, file, line
+    end
+
+
+    def assert_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      n = (expected - actual).abs
+      msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to be <= #{delta}" }
+      assert delta >= n, msg, file, line
+    end
+
+    def refute_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      n = (expected - actual).abs
+      msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to not be <= #{delta}" }
+      refute delta >= n, msg, file, line
+    end
+
+
+    def assert_in_epsilon(a, b, epsilon = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      delta = [a.abs, b.abs].min * epsilon
+      assert_in_delta a, b, delta, message, file, line
+    end
+
+    def refute_in_epsilon(a, b, epsilon = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      delta = a * epsilon
+      refute_in_delta a, b, delta, message, file, line
+    end
+
+
+    def assert_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { "Expected #{collection.inspect} to include #{obj.inspect}" }
+      assert collection.includes?(obj), msg, file, line
+    end
+
+    def refute_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { "Expected #{collection.inspect} to not include #{obj.inspect}" }
+      refute collection.includes?(obj), msg, file, line
     end
 
 
