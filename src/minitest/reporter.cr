@@ -64,7 +64,7 @@ module Minitest
       elsif result.skipped?
         print result.result_code.colorize(:yellow)
       else
-        print ColorizedObject.new(result.result_code).back(:red)
+        print Colorize::Object.new(result.result_code).back(:red)
       end
       puts if options.verbose
     end
