@@ -1,9 +1,12 @@
-# Test Unit for Crystal
+# Minitest for Crystal
 
-An attempt at implementing test units in Crystal, using the fantastic
-[minitest](https://github.com/seattlerb/minitest) as reference. It may
-eventually implement expectations and specs too, but mocks and stubs may be more
-complicated to have.
+Unit tests and assertions for the Crystal programming language, using the
+fantastic [minitest](https://github.com/seattlerb/minitest) as reference.
+
+Unit tests are ready to roll! Some preliminary work has begun to implement
+minitest/spec too, but they're still far from prime time.
+
+## Getting Started
 
 Given that you'd like to test the following class:
 
@@ -25,7 +28,7 @@ Define your tests as methods beginning with `test_`:
 require "minitest/autorun"
 
 class MemeTest < Minitest::Test
-  property! :meme  # to avoid @meme being nilable (not defined in all initialize methods)
+  property! :meme  # to avoid @meme being nilable
 
   def setup
     @meme = Meme.new
@@ -45,6 +48,12 @@ class MemeTest < Minitest::Test
 end
 ```
 
+Eventually run it:
+
+```
+$ crystal test/meme_test.cr -- --verbose
+```
+
 ## TODO
 
 - [x] keep a list of classes inheriting Minitest::Test (test suites)
@@ -58,8 +67,8 @@ end
 - [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
 - [ ] after run hooks
-- [.] assertions
-- [.] refutations
+- [x] assertions
+- [x] refutations
 - [x] skip / flunk
 - [x] reporter: composite (dispatches to linked reporters)
 - [x] reporter: progress
@@ -67,6 +76,10 @@ end
 - [x] reporter: summary
 - [x] reporter: colors
 - [x] command line options (--verbose, -n PATTERN, --parallel THREADS)
+- [ ] specs (describe, context, before, after, it, specify)
+- [ ] nested specs (describe, context, before, after)
+- [ ] must/wont expectations
+- [ ] expect ... to ... expectations
 
 ## Requirements
 
