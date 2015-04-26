@@ -78,8 +78,8 @@ macro describe(name, &block)
   class {{
           name.id.stringify.strip
             .gsub(/[^0-9a-zA-Z:]+/, "_")
-            .split("_").map { |s| s.capitalize }.join("")
-            .split("::").map { |s| s.capitalize }.join("::")
+            .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
+            .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
             .id
         }}Test < Minitest::Spec
 
