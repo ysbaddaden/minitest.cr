@@ -1,8 +1,8 @@
 require "../src/autorun"
 
-class SpecTest < Minitest::Spec
-  before do
-    @value = "value"
+describe Minitest::Spec do
+  def value
+    "value"
   end
 
   it "passes" do
@@ -12,14 +12,10 @@ class SpecTest < Minitest::Spec
   it("accepts a bracket block") { assert true }
 
   it "calls an instance method" do
-    p assert_equal "value", value
+    assert_equal "value", value
   end
 
   it "musn't pass" do
-    assert false
-  end
-
-  def value
-    @value
+    assert_raises(Minitest::Assertion) { assert false }
   end
 end
