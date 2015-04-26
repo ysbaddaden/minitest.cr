@@ -101,7 +101,11 @@ module Minitest
         message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
         "to be the same as #{expected.inspect} (oid=#{expected.object_id})"
       }
-      assert expected.same?(actual), msg, file, line
+      if expected.responds_to?(:same?)
+        assert expected.same?(actual), msg, file, line
+      else
+        assert_responds_to expected, :same?, nil, file, line
+      end
     end
 
     def refute_same(expected, actual, message = nil, file = __FILE__, line = __LINE__)
@@ -109,7 +113,11 @@ module Minitest
         message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
         "to not be the same as #{expected.inspect} (oid=#{expected.object_id})"
       }
-      refute expected.same?(actual), msg, file, line
+      if expected.responds_to?(:same?)
+        refute expected.same?(actual), msg, file, line
+      else
+        assert_responds_to expected, :same?, nil, file, line
+      end
     end
 
 
@@ -135,13 +143,21 @@ module Minitest
 
 
     def assert_empty(actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{actual.inspect} to be empty" }
-      assert actual.empty?, msg, file, line
+      if actual.responds_to?(:empty?)
+        msg = -> { message || "Expected #{actual.inspect} to be empty" }
+        assert actual.empty?, msg, file, line
+      else
+        assert_responds_to actual, :empty?
+      end
     end
 
     def refute_empty(actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{actual.inspect} to not be empty" }
-      refute actual.empty?, msg, file, line
+      if actual.responds_to?(:empty?)
+        msg = -> { message || "Expected #{actual.inspect} to not be empty" }
+        refute actual.empty?, msg, file, line
+      else
+        assert_responds_to actual, :empty?
+      end
     end
 
 
@@ -155,13 +171,13 @@ module Minitest
 
 
     def assert_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
-      n = (expected - actual).abs
+      n = (expected.to_f - actual.to_f).abs
       msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to be <= #{delta}" }
       assert delta >= n, msg, file, line
     end
 
     def refute_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
-      n = (expected - actual).abs
+      n = (expected.to_f - actual.to_f).abs
       msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to not be <= #{delta}" }
       refute delta >= n, msg, file, line
     end
@@ -179,13 +195,32 @@ module Minitest
 
 
     def assert_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { "Expected #{collection.inspect} to include #{obj.inspect}" }
-      assert collection.includes?(obj), msg, file, line
+      msg = -> { message || "Expected #{collection.inspect} to include #{obj.inspect}" }
+      if collection.responds_to?(:includes?)
+        assert collection.includes?(obj), msg, file, line
+      else
+        assert_responds_to collection, :includes?
+      end
     end
 
     def refute_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { "Expected #{collection.inspect} to not include #{obj.inspect}" }
-      refute collection.includes?(obj), msg, file, line
+      msg = -> { message || "Expected #{collection.inspect} to not include #{obj.inspect}" }
+      if collection.responds_to?(:includes?)
+        refute collection.includes?(obj), msg, file, line
+      else
+        assert_responds_to collection, :includes?
+      end
+    end
+
+
+    macro assert_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
+      assert {{ obj }}.responds_to?(:{{ method.id }}), msg, file, line
+    end
+
+    macro refute_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
+      refute {{ obj }}.responds_to?(:{{ method.id }}), msg, file, line
     end
 
 

@@ -1,3 +1,5 @@
+require "./expectations"
+
 module Minitest
   class Spec < Test
     def after_teardown
@@ -63,6 +65,10 @@ module Minitest
       def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}
         {{ block.body }}
       end
+    end
+
+    def expect(value)
+      Expectation.new(value)
     end
   end
 end

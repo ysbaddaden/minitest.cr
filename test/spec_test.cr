@@ -46,4 +46,11 @@ describe Minitest::Spec do
       assert_nil foo.bar
     end
   end
+
+  describe "expect" do
+    it "wraps value" do
+      expect(1).must_equal(1)
+      expect(Foo.new).wont_be_same_as(Foo.new)
+    end
+  end
 end
