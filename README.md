@@ -3,8 +3,9 @@
 Unit tests and assertions for the Crystal programming language, using the
 fantastic [minitest](https://github.com/seattlerb/minitest) as reference.
 
-Unit tests are ready to roll! Some preliminary work has begun to implement
-minitest/spec too, but they're still far from prime time.
+Unit tests are ready to roll! Preliminary work has begun to implement
+minitest/spec too, following the same rationale, which means that calling
+describe/it will actually generate unit test classes and methods.
 
 ## Getting Started
 
@@ -12,7 +13,7 @@ Given that you'd like to test the following class:
 
 ```crystal
 class Meme
-  def i_can_haz_cheezburger?
+  def i_can_has_cheezburger?
     "OHAI!"
   end
 
@@ -21,6 +22,8 @@ class Meme
   end
 end
 ```
+
+### Unit Tests
 
 Define your tests as methods beginning with `test_`:
 
@@ -35,7 +38,7 @@ class MemeTest < Minitest::Test
   end
 
   def test_that_kitty_can_eat
-    assert_equal "OHAI!", meme.i_can_haz_cheezburger?
+    assert_equal "OHAI!", meme.i_can_has_cheezburger?
   end
 
   def test_that_it_will_not_blend?
@@ -48,10 +51,39 @@ class MemeTest < Minitest::Test
 end
 ```
 
-Eventually run it:
+### Specs
+
+Specs follow the same
+[design rationale](https://github.com/seattlerb/minitest/blob/master/design_rationale.rb)
+than the original Minitest: `describe` generates classes that inherit from
+Minitest::Test, and `it` generates test methods.
+
+```crystal
+require "minitest/autorun"
+
+describe Meme do
+  let(:meme) { @meme = Meme.new }
+
+  describe "when asked about cheeseburgers" do
+    it "must respond positively" do
+      @meme.i_can_has_cheezburger?.must_equal("OHAI!")
+    end
+  end
+
+  describe "when asked about blending possibilities" do
+    it "won't say no" do
+      @meme.will_it_blend?.wont_match(/^no/i)
+    end
+  end
+end
+```
+
+### Run Tests
+
+Eventually run the tests:
 
 ```
-$ crystal test/meme_test.cr -- --verbose
+$ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
 ```
 
 ## TODO
@@ -76,15 +108,15 @@ $ crystal test/meme_test.cr -- --verbose
 - [x] reporter: summary
 - [x] reporter: colors
 - [x] command line options (--verbose, -n PATTERN, --parallel THREADS)
-- [ ] specs (describe, context, before, after, it, specify)
-- [ ] nested specs (describe, context, before, after)
-- [ ] must/wont expectations
-- [ ] expect ... to ... expectations
+- [x] specs (describe, before, after, it)
+- [x] nested specs (describe, before, after)
+- [x] must/wont expectations
+- [x] expect ... to ... expectations
 
 ## Requirements
 
-This requires Crystal >= 0.6.1. As of March 2, 2015 this is the current master
-branch.
+This requires Crystal >= 0.6.2 (see issue [#576](https://github.com/manastech/crystal/issues/576)).
+As of April 26, 2015 this is the current master branch.
 
 ## License
 
