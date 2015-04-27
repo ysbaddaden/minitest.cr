@@ -17,6 +17,11 @@ describe Minitest::Spec do
 
   it("accepts a block with brackets") { assert true }
 
+  it("reports the original failure location") do
+    ex = assert_raises(Minitest::Assertion) { assert false }
+    assert_equal("test/spec_test.cr:21", ex.location)
+  end
+
   it "calls an instance method" do
     assert_equal 3, add(1, 2)
   end

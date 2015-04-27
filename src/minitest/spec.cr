@@ -17,7 +17,7 @@ module Minitest
     macro let(name, &block)
       def {{ name.id }}
         #@_memoized ||= {} of String => Reference
-        #@_memoized[{{ name.id.stringify }}] ||= begin; {{ block.body }}; end
+        #@_memoized[{{ name.id.stringify }}] ||= begin; {{ yield }}; end
 
         memoized = @_memoized ||= [] of String
 
@@ -26,20 +26,20 @@ module Minitest
           @{{ name.id }} = nil
         end
 
-        @{{ name.id }} ||= begin; {{ block.body }}; end
+        @{{ name.id }} ||= begin; {{ yield }}; end
       end
     end
 
     macro before(&block)
       def setup
         super()
-        {{ block.body }}
+        {{ yield }}
       end
     end
 
     macro after(&block)
       def teardown
-        {{ block.body }}
+        {{ yield }}
         super()
       end
     end
@@ -57,13 +57,13 @@ module Minitest
           "#{ {{ @class_name.id }}.name }::{{ name.id }}"
         end
 
-        {{ block.body }}
+        {{ yield }}
       end
     end
 
     macro it(name = "anonymous", &block)
       def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}
-        {{ block.body }}
+        {{ yield }}
       end
     end
 
@@ -87,6 +87,6 @@ macro describe(name, &block)
       {{ name.id.stringify }}
     end
 
-    {{ block.body }}
+    {{ yield }}
   end
 end
