@@ -56,7 +56,7 @@ end
 Specs follow the same
 [design rationale](https://github.com/seattlerb/minitest/blob/master/design_rationale.rb)
 than the original Minitest: `describe` generates classes that inherit from
-Minitest::Test, and `it` generates test methods.
+Minitest::Spec, and `it` generates test methods.
 
 ```crystal
 require "minitest/autorun"
@@ -115,8 +115,7 @@ $ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
 
 ## Requirements
 
-This requires Crystal >= 0.6.2 (see issue [#576](https://github.com/manastech/crystal/issues/576)).
-As of April 26, 2015 this is the current master branch.
+Eequires [Crystal](http://crystal-lang.org) >= 0.7.0
 
 ## License
 

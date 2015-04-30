@@ -19,10 +19,10 @@ module Minitest
         #@_memoized ||= {} of String => Reference
         #@_memoized[{{ name.id.stringify }}] ||= begin; {{ yield }}; end
 
-        memoized = @_memoized ||= [] of String
+        %memoized = @_memoized ||= [] of String
 
-        unless memoized.includes?({{ name.id.stringify }})
-          memoized << {{ name.id.stringify }}
+        unless %memoized.includes?({{ name.id.stringify }})
+          %memoized << {{ name.id.stringify }}
           @{{ name.id }} = nil
         end
 
@@ -45,14 +45,14 @@ module Minitest
     end
 
     macro describe(name, &block)
-      class {{
-              name.id.stringify.strip
-                .gsub(/[^0-9a-zA-Z:]+/, "_")
-                .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
-                .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
-                .id
-            }} < {{ @class_name.id }}
-
+      {%
+        class_name = name.id.stringify.strip
+          .gsub(/[^0-9a-zA-Z:]+/, "_")
+          .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
+          .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
+          .id
+      %}
+      class {{ class_name }}Spec < {{ @class_name.id }}
         def self.name
           "#{ {{ @class_name.id }}.name }::{{ name.id }}"
         end
@@ -75,14 +75,14 @@ end
 
 # TODO: allow to inherit from specific classes (configurable with matcher)
 macro describe(name, &block)
-  class {{
-          name.id.stringify.strip
-            .gsub(/[^0-9a-zA-Z:]+/, "_")
-            .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
-            .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
-            .id
-        }}Test < Minitest::Spec
-
+  {%
+    class_name = name.id.stringify.strip
+      .gsub(/[^0-9a-zA-Z:]+/, "_")
+      .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
+      .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
+      .id
+  %}
+  class {{ class_name }}Spec < Minitest::Spec
     def self.name
       {{ name.id.stringify }}
     end

@@ -9,12 +9,6 @@ class Exception
   def location
     "#{file}:#{line}"
   end
-
-  # NOTE: hack to avoid segfault on calling "obj.class"
-  #       https://github.com/manastech/crystal/issues/416
-  macro def __minitest_class_name : String
-    {{ @class_name }}
-  end
 end
 
 module Minitest
@@ -33,7 +27,7 @@ module Minitest
     getter :exception
 
     def initialize(@exception)
-      super "#{exception.__minitest_class_name}: #{exception.message}"
+      super "#{exception.class.name}: #{exception.message}"
       @file = exception.file
     end
 
@@ -214,13 +208,13 @@ module Minitest
 
 
     macro assert_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
-      assert {{ obj }}.responds_to?(:{{ method.id }}), msg, file, line
+      %msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
+      assert {{ obj }}.responds_to?(:{{ method.id }}), %msg, file, line
     end
 
     macro refute_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
-      refute {{ obj }}.responds_to?(:{{ method.id }}), msg, file, line
+      %msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
+      refute {{ obj }}.responds_to?(:{{ method.id }}), %msg, file, line
     end
 
 
@@ -239,16 +233,16 @@ module Minitest
     macro assert_raises(klass, file = __FILE__, line = __LINE__)
       begin
         {{ yield }}
-      rescue __minitest_ex : {{ klass.id }}
-        __minitest_ex
-      rescue __minitest_ex
+      rescue %ex : {{ klass.id }}
+        %ex
+      rescue %ex
         raise Minitest::Assertion.new(
-          "Expected #{ {{klass.id}} } but #{__minitest_ex.__minitest_class_name} was raised",
+          "Expected #{ {{ klass.id }} } but #{ %ex.class.name } was raised",
           file: {{ file }}, line: {{ line }}
         )
       else
         raise Minitest::Assertion.new(
-          "Expected #{ {{klass.id}} } but nothing was raised",
+          "Expected #{ {{ klass.id }} } but nothing was raised",
           file: {{ file }}, line: {{ line }}
         )
       end
