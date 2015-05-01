@@ -1,5 +1,4 @@
 require "option_parser"
-require "thread"
 require "./minitest/result"
 require "./minitest/reporter"
 require "./minitest/runnable"
@@ -72,8 +71,8 @@ module Minitest
     suites = Runnable.runnables.shuffle
     count = suites.size < options.threads ? suites.size : options.threads
 
-    threads = (0 ... count).map do
-      Thread.new do
+    count.times do
+      spawn do
         loop do
           if suite = @@mutex.synchronize { suites.pop unless suites.empty? }
             suite.run(reporter)
@@ -83,7 +82,11 @@ module Minitest
         end
       end
     end
-    threads.each(&.join)
+
+    loop do
+      sleep 0.001
+      break if suites.empty?
+    end
 
     reporter.report
     reporter.passed?
