@@ -62,17 +62,17 @@ Minitest::Spec, and `it` generates test methods.
 require "minitest/autorun"
 
 describe Meme do
-  let(:meme) { @meme = Meme.new }
+  let(:meme) { Meme.new }
 
   describe "when asked about cheeseburgers" do
     it "must respond positively" do
-      @meme.i_can_has_cheezburger?.must_equal("OHAI!")
+      meme.i_can_has_cheezburger?.must_equal("OHAI!")
     end
   end
 
   describe "when asked about blending possibilities" do
     it "won't say no" do
-      @meme.will_it_blend?.wont_match(/^no/i)
+      meme.will_it_blend?.wont_match(/^no/i)
     end
   end
 end
