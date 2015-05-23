@@ -115,7 +115,7 @@ $ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
 
 ## Requirements
 
-Eequires [Crystal](http://crystal-lang.org) >= 0.7.0
+Requires [Crystal](http://crystal-lang.org) > 0.7.1
 
 ## License
 
