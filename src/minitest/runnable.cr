@@ -12,10 +12,10 @@ module Minitest
 
     macro def self.run(reporter) : Nil
       klass = {{
-        if @class_name.ends_with?(":Class")
-          @class_name[0..-7].id
+        if @type.name.ends_with?(":Class")
+          @type.name[0..-7].id
         else
-          @class_name
+          @type.name
         end.id
       }}
       klass.new(reporter).run_tests

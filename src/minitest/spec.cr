@@ -52,9 +52,9 @@ module Minitest
           .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
           .id
       %}
-      class {{ class_name }}Spec < {{ @class_name.id }}
+      class {{ class_name }}Spec < {{ @type.name.id }}
         def self.name
-          "#{ {{ @class_name.id }}.name }::{{ name.id }}"
+          "#{ {{ @type.name.id }}.name }::{{ name.id }}"
         end
 
         {{ yield }}
