@@ -99,16 +99,9 @@ module Minitest
 
     def report
       @total_time = Time.new - start_time
-
-      # NOTE: disabled until crystal fixes compiler bugs with .class (ie. runtime metaprogramming)
-      #aggregate = results.group_by { |r| r.failure.class }
-      #@failures = aggregate[Assertion].size
-      #@errors = aggregate[UnexpectedError].size
-      #@skips = aggregate[Skip].size
-
-      @failures = results.select(&.failure.is_a?(Assertion)).size
-      @errors = results.select(&.failure.is_a?(UnexpectedError)).size
-      @skips = results.select(&.failure.is_a?(Skip)).size
+      @failures = results.count(&.failure.is_a?(Assertion))
+      @errors = results.count(&.failure.is_a?(UnexpectedError))
+      @skips = results.count(&.failure.is_a?(Skip))
     end
 
     def passed?
@@ -116,7 +109,6 @@ module Minitest
     end
   end
 
-  # TODO: report origin of failures (file, line)
   class SummaryReporter < StatisticsReporter
     def report
       super
