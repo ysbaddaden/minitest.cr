@@ -53,9 +53,9 @@ module Minitest
     def record(result)
       if options.verbose
         if time = result.time
-          LibC.printf "%s#%s = %.03f s = ", result.class_name, result.name, result.time.to_f
+          print "%s#%s = %.3f s = " % {result.class_name, result.name, result.time.to_f}
         else
-          LibC.printf "%s#%s = ? = ", result.class_name, result.name
+          print "%s#%s = ? = " % {result.class_name, result.name}
         end
       end
 
@@ -67,6 +67,9 @@ module Minitest
         print Colorize::Object.new(result.result_code).back(:red)
       end
       puts if options.verbose
+    rescue ex
+      puts ex
+      puts ex.backtrace.join("\n")
     end
   end
 
