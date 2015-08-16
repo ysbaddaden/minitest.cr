@@ -22,12 +22,18 @@ module Minitest
     def must_be_close_to(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       Expectation.new(self).must_be_close_to(expected, delta, message, file, line)
     end
-    alias_method :must_be_within_delta, :must_be_close_to
+
+    def must_be_within_delta(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      must_be_close_to(expected, delta, message, file, line)
+    end
 
     def wont_be_close_to(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       Expectation.new(self).wont_be_close_to(expected, delta, message, file, line)
     end
-    alias_method :wont_be_within_delta, :wont_be_close_to
+
+    def wont_be_within_delta(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      wont_be_close_to(expected, delta, message, file, line)
+    end
 
     def must_be_within_epsilon(expected, epsilon = 0.001, message = nil, file = __FILE__, line = __LINE__)
       Expectation.new(self).must_be_within_epsilon(expected, epsilon, message, file, line)
@@ -95,12 +101,18 @@ module Minitest
     def must_be_close_to(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       assert_in_delta(@target, expected, delta)
     end
-    alias_method :must_be_within_delta, :must_be_close_to
+
+    def must_be_within_delta(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      must_be_close_to(expected, delta, message, file, line)
+    end
 
     def wont_be_close_to(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       refute_in_delta(@target, expected, delta, message, file, line)
     end
-    alias_method :wont_be_within_delta, :wont_be_close_to
+
+    def wont_be_within_delta(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
+      wont_be_close_to(expected, delta, message, file, line)
+    end
 
     def must_be_within_epsilon(expected, epsilon = 0.001, message = nil, file = __FILE__, line = __LINE__)
       assert_in_epsilon(@target, expected, epsilon, message, file, line)
