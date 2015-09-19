@@ -6,7 +6,7 @@ module Minitest
     def initialize(@class_name, @name)
       @assertions = 0
       @failures = [] of Assertion | Skip | UnexpectedError
-      @time :: TimeSpan # avoid nilable
+      @time :: Time::Span # avoid nilable
     end
 
     def passed?
