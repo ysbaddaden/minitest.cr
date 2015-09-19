@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.4
+
+- Compatibility with Crystal 0.8.0
+
 ## v0.1.3
 
 - Compatibility with Crystal 0.7.7 (no more `alias_method`)
