@@ -4,6 +4,7 @@ class Exception
   # NOTE: hack to report the source location that raised
   def initialize(@message = nil : String?, @cause = nil : Exception?, @file = __FILE__, @line = __LINE__)
     @backtrace = caller
+    @callstack = CallStack.new
   end
 
   def location
