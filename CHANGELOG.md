@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.1.5
+
+Fixes:
+- Don't exit until all test suites have completed
+- Exception overload with Crystal 0.8.0
+
 ## v0.1.4
 
 - Compatibility with Crystal 0.8.0
