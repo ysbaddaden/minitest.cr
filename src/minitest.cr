@@ -24,8 +24,6 @@ module Minitest
     end
   end
 
-  @@mutex = Mutex.new
-
   def self.options
     @@options ||= Options.new
   end
@@ -70,12 +68,14 @@ module Minitest
 
     suites = Runnable.runnables.shuffle
     count = suites.size < options.threads ? suites.size : options.threads
+    completed = 0
 
     count.times do
       spawn do
         loop do
-          if suite = @@mutex.synchronize { suites.pop unless suites.empty? }
+          if suite = suites.pop?
             suite.run(reporter)
+            completed += 1
           else
             break
           end
@@ -85,7 +85,7 @@ module Minitest
 
     loop do
       sleep 0.001
-      break if suites.empty?
+      break if completed >= Runnable.runnables.size
     end
 
     reporter.report
