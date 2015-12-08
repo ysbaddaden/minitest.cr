@@ -16,7 +16,7 @@ module Minitest
   module LocationFilter
     def file
       file = @file.to_s
-      cwd = Dir.working_directory
+      cwd = Dir.current
       file.starts_with?(cwd) ? file[(cwd.size + 1) .. -1] : file
     end
   end
