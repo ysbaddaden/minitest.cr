@@ -98,7 +98,7 @@ $ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
 - [x] run the test methods
 - [x] run setup / teardown methods before / after each test
 - [x] capture exceptions in setup, test or teardown
-- [ ] after run hooks
+- [x] after run hooks
 - [x] assertions
 - [x] refutations
 - [x] skip / flunk

@@ -90,5 +90,16 @@ module Minitest
 
     reporter.report
     reporter.passed?
+  ensure
+    after_run.each(&.call)
+    reporter.passed?
+  end
+
+  def self.after_run
+    @@after_run ||= [] of ->
+  end
+
+  def self.after_run(&block)
+    after_run << block
   end
 end
