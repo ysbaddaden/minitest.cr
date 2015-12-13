@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.2.0
+
+Feature:
+- `Minitest.after_run` hooks
+
+Fixes:
+- Crystal > 0.9.1 compatibility
+
 ## v0.1.5
 
 Fixes:
