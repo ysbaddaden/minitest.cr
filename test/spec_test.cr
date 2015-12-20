@@ -39,6 +39,18 @@ describe Minitest::Spec do
     end
   end
 
+  describe ".class_method describe" do
+    it "accepts" do
+      assert true
+    end
+  end
+
+  describe "#instance_method describe" do
+    it "accepts" do
+      assert true
+    end
+  end
+
   describe "let" do
     let(:foo) { Foo.new }
 
