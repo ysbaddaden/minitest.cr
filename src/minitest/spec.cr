@@ -46,8 +46,9 @@ module Minitest
 
     macro describe(name, &block)
       {%
-        class_name = name.id.stringify.strip
+        class_name = name.id.stringify
           .gsub(/[^0-9a-zA-Z:]+/, "_")
+          .gsub(/^_|_$/, "")
           .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
           .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
           .id

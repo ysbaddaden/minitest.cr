@@ -39,6 +39,10 @@ describe Minitest::Spec do
     end
   end
 
+  describe(". starting with special chars") {}
+  describe("ending with special chars #") {}
+  it(". has leading and ending special chars .") {}
+
   describe "let" do
     let(:foo) { Foo.new }
 
