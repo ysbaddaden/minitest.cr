@@ -3,10 +3,6 @@
 Unit tests and assertions for the Crystal programming language, using the
 fantastic [minitest](https://github.com/seattlerb/minitest) as reference.
 
-Unit tests are ready to roll! Preliminary work has begun to implement
-minitest/spec too, following the same rationale, which means that calling
-describe/it will actually generate unit test classes and methods.
-
 ## Getting Started
 
 Given that you'd like to test the following class:
@@ -31,10 +27,8 @@ Define your tests as methods beginning with `test_`:
 require "minitest/autorun"
 
 class MemeTest < Minitest::Test
-  property! :meme  # to avoid @meme being nilable
-
-  def setup
-    @meme = Meme.new
+  def meme
+    @meme ||= Meme.new
   end
 
   def test_that_kitty_can_eat
@@ -85,37 +79,6 @@ Eventually run the tests:
 ```
 $ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
 ```
-
-## TODO
-
-- [x] keep a list of classes inheriting Minitest::Test (test suites)
-- [x] shuffle test suites
-- [x] run all test suites at exit
-- [x] run test suites in parallel
-- [x] extract the list of test methods from test suites
-- [x] shuffle test methods
-- [x] filter test methods to run
-- [x] run the test methods
-- [x] run setup / teardown methods before / after each test
-- [x] capture exceptions in setup, test or teardown
-- [x] after run hooks
-- [x] assertions
-- [x] refutations
-- [x] skip / flunk
-- [x] reporter: composite (dispatches to linked reporters)
-- [x] reporter: progress
-- [x] reporter: verbose progress
-- [x] reporter: summary
-- [x] reporter: colors
-- [x] command line options (--verbose, -n PATTERN, --parallel THREADS)
-- [x] specs (describe, before, after, it)
-- [x] nested specs (describe, before, after)
-- [x] must/wont expectations
-- [x] expect ... to ... expectations
-
-## Requirements
-
-Requires [Crystal](http://crystal-lang.org) > 0.7.1
 
 ## License
 
