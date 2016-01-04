@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Unreleased
+
+Breaking Change:
+- Each test now runs in a single instance of the test class, so instance
+  variables don't leak from one test to another.
+
+  This change will have a breaking impact if you rely on instance variables to
+  cache or share data between tests. You'll may want to use class variables for
+  this purpose instead.
+
+Fixes:
+- Allows describes in specs to start with special chars like `.` or `#`.
+
 ## v0.2.0
 
 Feature:

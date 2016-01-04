@@ -18,7 +18,7 @@ module Minitest
           @type.name
         end.id
       }}
-      klass.new(reporter).run_tests
+      klass.run_tests(reporter)
       nil
     end
 
@@ -27,7 +27,7 @@ module Minitest
     def initialize(@reporter)
     end
 
-    def run_tests
+    def self.run_tests(reporter)
     end
   end
 end
