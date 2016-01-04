@@ -258,11 +258,11 @@ module Minitest
 
 
     def skip(message = "", file = __FILE__, line = __LINE__)
-      raise Minitest::Skip.new(message, file: file, line: line)
+      raise Minitest::Skip.new(message.to_s, file: file, line: line)
     end
 
     def flunk(message = "Epic Fail!", file = __FILE__, line = __LINE__)
-      raise Minitest::Assertion.new(message, file: file, line: line)
+      raise Minitest::Assertion.new(message.to_s, file: file, line: line)
     end
   end
 end

@@ -11,7 +11,8 @@ Breaking Change:
   this purpose instead.
 
 Fixes:
-- Allows describes in specs to start with special chars like `.` or `#`.
+- Allow describes in specs to start with special chars like `.` or `#`
+- Allow `skip :symbol` and `flunk :symbol`
 
 ## v0.2.0
 
