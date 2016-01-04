@@ -72,12 +72,32 @@ describe Meme do
 end
 ```
 
+You may use assertions in your specs (they'll work the same) or you may prefer the `expect` syntax:
+
+```crystal
+expect(meme.i_can_haz_cheezeburger?).must_equal("OHAI!")
+expect(meme.will_it_blend?).wont_match(/^no/i)
+```
+
 ### Run Tests
 
 Eventually run the tests:
 
 ```
 $ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
+```
+
+You may filter your tests using an exact test name, or a regexp:
+
+```
+$ crystal test/meme_test.cr -- -n test_that_kitty_can_eat
+$ crystal test/meme_test.cr -- -n /will/
+```
+
+When using Minitest::Spec with assertions or the `expect` syntax, you can avoid to taint Object with all the `#must_` and `#wont_` expectations:
+
+```
+$ crystal -Dmt_no_expectations spec/meme_spec.cr
 ```
 
 ## License
