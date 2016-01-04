@@ -1,24 +1,11 @@
 module Minitest
   class Runnable
-    @@runnables = [] of Runnable.class
-
-    def self.runnables
-      @@runnables
-    end
-
-    macro inherited
-      Minitest::Runnable.runnables << self
+    macro def self.runnables : Array(Runnable.class)
+      [self, {{ @type.all_subclasses.join(", ").id }}]
     end
 
     macro def self.run(reporter) : Nil
-      klass = {{
-        if @type.name.ends_with?(":Class")
-          @type.name[0..-7].id
-        else
-          @type.name
-        end.id
-      }}
-      klass.run_tests(reporter)
+      {{ @type }}.run_tests(reporter)
       nil
     end
 

@@ -29,11 +29,10 @@ module Minitest
           .gsub(/^_|_$/, "")
           .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
           .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
-          .id
       %}
-      class {{ class_name }}Spec < {{ @type.name.id }}
+      class {{ class_name.id }}Spec < {{ @type }}
         def self.name
-          "#{ {{ @type.name.id }}.name }::{{ name.id }}"
+          "#{ {{ @type }}.name }::{{ name.id }}"
         end
 
         {{ yield }}
@@ -60,9 +59,8 @@ macro describe(name, &block)
       .gsub(/^_|_$/, "")
       .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
       .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
-      .id
   %}
-  class {{ class_name }}Spec < Minitest::Spec
+  class {{ class_name.id }}Spec < Minitest::Spec
     def self.name
       {{ name.id.stringify }}
     end

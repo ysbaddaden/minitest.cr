@@ -15,15 +15,7 @@ end
 module Minitest
   module LocationFilter
     def file
-      file = @file.to_s
-      dir = Dir
-      cwd = if dir.responds_to?(:current)
-              dir.current           # crystal > 0.9.1
-            elsif dir.responds_to?(:working_directory)
-              dir.working_directory # crystal <= 0.9.1
-            else
-              raise "unreachable"
-            end
+      file, cwd = @file.to_s, Dir.current
       file.starts_with?(cwd) ? file[(cwd.size + 1) .. -1] : file
     end
   end

@@ -26,11 +26,11 @@ module Minitest
     include Assertions
 
     macro def self.run_tests(reporter) : Nil
-      {% names = @type.methods.map(&.name.stringify).select(&.starts_with?("test_")) %}
+      {% names = @type.methods.map(&.name).select(&.starts_with?("test_")) %}
 
       {% for name in names.shuffle %}
         %test = new(reporter)
-        %test.run_one({{ name }}) { %test.{{ name.id }} }
+        %test.run_one({{ name.stringify }}) { %test.{{ name }} }
       {% end %}
 
       nil
@@ -42,7 +42,7 @@ module Minitest
       when String then return unless name == pattern
       end
 
-      result = Result.new(self.class.to_s, name)
+      result = Result.new(self.class.name, name)
       start_time = Time.now
 
       capture_exception(result) do
