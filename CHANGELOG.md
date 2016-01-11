@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v0.3.0
 
 Breaking Change:
 - Each test now runs in a single instance of the test class, so instance

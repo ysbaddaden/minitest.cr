@@ -1,5 +1,8 @@
 name: minitest
-version: 0.2.0
+version: 0.3.0
+description: The Minitest testing facilities (Unit, Spec, Assertions, Expectations)
 
 authors:
   - Julien Portalier <julien@portalier.com>
+
+license: MIT
