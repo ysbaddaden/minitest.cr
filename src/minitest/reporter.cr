@@ -84,8 +84,8 @@ module Minitest
       @failures = 0
       @errors = 0
       @skips = 0
-      @start_time :: Time # avoid nilable
-      @total_time :: Time::Span # avoid nilable
+      @start_time = uninitialized Time # avoid nilable
+      @total_time = uninitialized Time::Span # avoid nilable
     end
 
     def start
