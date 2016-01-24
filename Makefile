@@ -1,6 +1,4 @@
-ifndef CRYSTAL_BIN
-	CRYSTAL_BIN = `which crystal`
-endif
+CRYSTAL_BIN ?= = `which crystal`
 
 .PHONY: test
 
