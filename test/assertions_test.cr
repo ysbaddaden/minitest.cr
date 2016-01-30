@@ -29,6 +29,9 @@ class AssertionsTest < Minitest::Test
     assert_equal 1, 1
     assert_equal "abcd", "abcd"
     assert_raises(Minitest::Assertion) { assert_equal 1, 2 }
+
+    ex = assert_raises(Minitest::Assertion) { assert_equal "a\nb\n", "a\nc\n" }
+    assert_equal "--- expected\n+++ actual\n@@ -1,3 +1,3 @@\n \"a\n-b\n+c\n \"", ex.message
   end
 
   def test_refute_equal

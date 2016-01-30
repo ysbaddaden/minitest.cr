@@ -1,3 +1,5 @@
+require "tempfile"
+
 class Exception
   getter :file, :line
 
@@ -55,6 +57,25 @@ module Minitest
   # TODO: assert_output / refute_output
   # TODO: assert_silent / refute_silent
   module Assertions
+    def self.diff?
+      @@diff ||= Process.new("diff").wait.success?
+    end
+
+    def diff(expected, actual)
+      a = Tempfile.open("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
+      b = Tempfile.open("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
+
+      Process.run("diff", {"-u", a.path, b.path}, output: nil) do |process|
+        process.output.gets_to_end
+          .sub(/^--- [^\n]*/m, "--- expected")
+          .sub(/^\+\+\+ [^\n]*/m, "+++ actual")
+          .strip
+      end
+    ensure
+      if a; a.unlink; end
+      if b; b.unlink; end
+    end
+
     def assert(actual, message = nil, file = __FILE__, line = __LINE__)
       return true if actual
 
@@ -80,7 +101,18 @@ module Minitest
 
 
     def assert_equal(expected, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{expected.inspect} but got #{actual.inspect}" }
+      msg = -> {
+        if need_diff?(expected, actual)
+          result = diff(expected, actual)
+          if result.empty?
+            "No visual difference found. Maybe expected class '#{expected.class.name}' isn't comparable to actual class '#{actual.class.name}' ?"
+          else
+            result
+          end
+        else
+          message || "Expected #{expected.inspect} but got #{actual.inspect}"
+        end
+      }
       assert expected == actual, msg, file, line
     end
 
@@ -116,7 +148,7 @@ module Minitest
 
 
     def assert_match(pattern : Regex, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{pattern.inspect} to match #{actual.inspect}" }
+      msg = -> { message || "Expected #{pattern.inspect} to match: #{actual.inspect}" }
       assert actual =~ pattern, msg, file, line
     end
 
@@ -255,6 +287,16 @@ module Minitest
 
     def flunk(message = "Epic Fail!", file = __FILE__, line = __LINE__)
       raise Minitest::Assertion.new(message.to_s, file: file, line: line)
+    end
+
+
+    private def need_diff?(expected, actual)
+      return false unless expected.is_a?(String)
+      return false unless actual.is_a?(String)
+
+      return Minitest::Assertions.diff? ||
+        expected.index('\n') || actual.index('\n') ||
+        expected.size > 30 || actual.size > 30
     end
   end
 end
