@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.3.2
+
+Fixes:
+- Compatibility with Crystal 0.14.0
+
 ## v0.3.1
 
 Fixes:
