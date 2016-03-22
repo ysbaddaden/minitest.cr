@@ -4,7 +4,7 @@ class Exception
   getter :file, :line
 
   # NOTE: hack to report the source location that raised
-  def initialize(@message = nil : String?, @cause = nil : Exception?, @file = __FILE__, @line = __LINE__)
+  def initialize(@message : String? = nil, @cause : Exception? = nil, @file = __FILE__, @line = __LINE__)
     @backtrace = caller
     @callstack = CallStack.new
   end
@@ -250,7 +250,7 @@ module Minitest
     end
 
 
-    def assert_raises(message = nil : String, file = __FILE__, line = __LINE__)
+    def assert_raises(message : String = nil, file = __FILE__, line = __LINE__)
       begin
         yield
       rescue ex
