@@ -2,7 +2,7 @@ require "../src/autorun"
 
 describe Minitest::Spec do
   class Foo
-    property :bar
+    property bar : String?
   end
 
   def add(a, b)
@@ -27,7 +27,7 @@ describe Minitest::Spec do
   end
 
   describe("nested describes") do
-    let(:more) { "more " + data }
+    let(:more) { "more #{data}" }
 
     it "accesses parent methods" do
       assert_equal 4, add(2, 2)

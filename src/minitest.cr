@@ -7,8 +7,9 @@ require "./minitest/spec"
 
 module Minitest
   class Options
-    property :verbose, :threads
-    getter :pattern
+    property verbose
+    property threads
+    getter pattern : String | Regex | Nil
 
     def initialize
       @verbose = false
@@ -50,6 +51,8 @@ module Minitest
       end
     end
   end
+
+  @@reporter : AbstractReporter?
 
   def self.reporter
     @@reporter ||= CompositeReporter.new(options).tap do |reporter|

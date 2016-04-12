@@ -9,7 +9,7 @@ module Minitest
       nil
     end
 
-    getter :reporter
+    getter reporter : AbstractReporter
 
     def initialize(@reporter)
     end

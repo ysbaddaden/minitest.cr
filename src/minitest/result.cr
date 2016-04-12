@@ -1,12 +1,14 @@
 module Minitest
   class Result
-    getter :assertions, :failures, :class_name, :name
-    property :time
+    getter assertions
+    getter class_name : String
+    getter failures
+    getter name : String
+    property! time : Time::Span
 
     def initialize(@class_name, @name)
       @assertions = 0
       @failures = [] of Assertion | Skip | UnexpectedError
-      @time = uninitialized Time::Span # avoid nilable
     end
 
     def passed?

@@ -1,10 +1,12 @@
 require "tempfile"
 
 class Exception
-  getter :file, :line
+  getter file : String?
+  getter line : Int32?
+  getter! backtrace : Array(String)
 
-  # NOTE: hack to report the source location that raised
   def initialize(@message : String? = nil, @cause : Exception? = nil, @file = __FILE__, @line = __LINE__)
+    # NOTE: hack to report the source location that raised
     @backtrace = caller
     @callstack = CallStack.new
   end
@@ -26,7 +28,7 @@ module Minitest
   class UnexpectedError < Exception
     include LocationFilter
 
-    getter :exception
+    getter exception : Exception
 
     def initialize(@exception)
       super "#{exception.class.name}: #{exception.message}"
@@ -57,8 +59,11 @@ module Minitest
   # TODO: assert_output / refute_output
   # TODO: assert_silent / refute_silent
   module Assertions
+    @@diff : Bool
+    @@diff = Process.new("diff").wait.success?
+
     def self.diff?
-      @@diff ||= Process.new("diff").wait.success?
+      @@diff
     end
 
     def diff(expected, actual)

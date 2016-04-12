@@ -2,7 +2,7 @@ require "colorize"
 
 module Minitest
   class AbstractReporter
-    getter! :options
+    getter options : Options
 
     def initialize(@options)
     end
@@ -22,7 +22,7 @@ module Minitest
   end
 
   class CompositeReporter < AbstractReporter
-    getter :reporters
+    getter reporters
 
     def initialize(@options)
       @reporters = [] of AbstractReporter
