@@ -49,6 +49,8 @@ describe Minitest::Spec do
 
   describe "let" do
     let(:foo) { Foo.new }
+    let(utc : Time) { Time.local }
+    let(local : Time = Time.local)
 
     it "memoizes the object for the duration of the test" do
       foo.bar = "baz"
@@ -57,6 +59,11 @@ describe Minitest::Spec do
 
     it "regenerates the object on each teardown" do
       assert_nil foo.bar
+    end
+
+    it "declares the object type" do
+      assert utc.is_a?(Time)
+      assert local.is_a?(Time)
     end
   end
 
