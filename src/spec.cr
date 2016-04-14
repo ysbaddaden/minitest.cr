@@ -3,9 +3,21 @@ require "./expectations"
 module Minitest
   class Spec < Test
     macro let(name, &block)
-      def {{ name.id }}
-        @{{ name.id }} ||= begin; {{ yield }}; end
-      end
+      {% if name.is_a?(TypeDeclaration) %}
+        {% if name.value && block %}
+          {% raise "A let declaration MUST have a default value OR an initializer block but NOT both" %}
+        {% end %}
+
+        @{{name.var}} : {{name.type}} | Nil
+
+        def {{name.var}} : {{name.type}}
+          @{{name.var}} ||= {% if block %} {{yield}} {% else %} {{name.value}} {% end %}
+        end
+      {% else %}
+        def {{name.id}}
+          @{{name.id}} ||= {{yield}}
+        end
+      {% end %}
     end
 
     macro before(&block)
