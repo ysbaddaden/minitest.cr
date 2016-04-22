@@ -59,11 +59,14 @@ module Minitest
   # TODO: assert_output / refute_output
   # TODO: assert_silent / refute_silent
   module Assertions
-    @@diff : Bool
-    @@diff = Process.new("diff").wait.success?
+    @@diff : Bool?
 
     def self.diff?
-      @@diff
+      if (diff = @@diff).is_a?(Bool)
+        diff
+      else
+        @@diff = Process.new("diff").wait.success?
+      end
     end
 
     def diff(expected, actual)
