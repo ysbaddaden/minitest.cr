@@ -49,7 +49,7 @@ end
 
 Specs follow the same
 [design rationale](https://github.com/seattlerb/minitest/blob/master/design_rationale.rb)
-than the original Minitest: `describe` generates classes that inherit from
+as the original Minitest: `describe` generates classes that inherit from
 Minitest::Spec, and `it` generates test methods.
 
 ```crystal
