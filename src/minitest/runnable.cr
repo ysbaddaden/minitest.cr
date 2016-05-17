@@ -1,10 +1,12 @@
 module Minitest
   class Runnable
     macro def self.runnables : Array(Runnable.class)
-      [self, {{ @type.all_subclasses.join(", ").id }}]
+      {% begin %}
+        [self, {{ @type.all_subclasses.join(", ").id }}]
+      {% end %}
     end
 
-    macro def self.run(reporter) : Nil
+    macro def self.run(reporter)
       {{ @type }}.run_tests(reporter)
       nil
     end

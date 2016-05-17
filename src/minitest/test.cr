@@ -25,12 +25,14 @@ module Minitest
     include LifecycleHooks
     include Assertions
 
-    macro def self.run_tests(reporter) : Nil
-      {% names = @type.methods.map(&.name).select(&.starts_with?("test_")) %}
+    macro def self.run_tests(reporter)
+      {% begin %}
+        {% names = @type.methods.map(&.name).select(&.starts_with?("test_")) %}
 
-      {% for name in names.shuffle %}
-        %test = new(reporter)
-        %test.run_one({{ name.stringify }}) { %test.{{ name }} }
+        {% for name in names.shuffle %}
+          %test = new(reporter)
+          %test.run_one({{ name.stringify }}) { %test.{{ name }} }
+        {% end %}
       {% end %}
 
       nil
