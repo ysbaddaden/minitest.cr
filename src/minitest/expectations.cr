@@ -156,8 +156,8 @@ module Minitest
   end
 end
 
-ifdef !mt_no_expectations
+{% if !flag?(:mt_no_expectations) %}
   class Object
     include Minitest::Expectations
   end
-end
+{% end %}
