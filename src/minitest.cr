@@ -1,9 +1,9 @@
 require "option_parser"
-require "./minitest/result"
-require "./minitest/reporter"
-require "./minitest/runnable"
-require "./minitest/test"
-require "./minitest/spec"
+require "./result"
+require "./reporter"
+require "./runnable"
+require "./test"
+require "./spec"
 
 module Minitest
   class Options
