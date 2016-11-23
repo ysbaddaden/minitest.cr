@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.3.5
+
+Changes:
+- dropped artificial src/minitest namespace for files
+
+Fixes:
+- Compatibility with Crystal 0.19.0
+
 ## v0.3.4
 
 Fixes:
