@@ -258,7 +258,7 @@ module Minitest
     end
 
 
-    def assert_raises(message : String = nil, file = __FILE__, line = __LINE__)
+    def assert_raises(message : String? = nil, file = __FILE__, line = __LINE__)
       begin
         yield
       rescue ex
