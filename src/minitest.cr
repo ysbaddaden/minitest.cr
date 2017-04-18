@@ -10,10 +10,12 @@ module Minitest
     property verbose
     property threads
     getter pattern : String | Regex | Nil
+    getter seed : UInt32
 
     def initialize
       @verbose = false
       @threads = 1
+      @seed = ENV["SEED"]?.try(&.to_u32) || Random.new_seed
     end
 
     def pattern=(pattern)
@@ -22,6 +24,30 @@ module Minitest
       else
         @pattern = pattern
       end
+    end
+
+    def seed=(@seed)
+    end
+
+    def to_s(io)
+      io << "Run options: --seed "
+      seed.to_s(io)
+
+      if verbose
+        io << " --verbose"
+      end
+
+      if threads = @threads
+        io << " --parallel "
+        threads.to_s(io)
+      end
+
+      if pattern = @pattern
+        io << " --name "
+        pattern.to_s(io)
+      end
+
+      io << "\n"
     end
   end
 
@@ -36,6 +62,10 @@ module Minitest
       opts.on("-h", "--help", "Display this help") do
         puts opts
         exit
+      end
+
+      opts.on("-s SEED", "--seed SEED", "Sets random seed. Also via SEED environment variable.") do |seed|
+        options.seed = seed.to_u32
       end
 
       opts.on("-v", "--verbose", "Show progress processing files.") do
@@ -67,6 +97,8 @@ module Minitest
 
   def self.run(args = nil)
     process_args(args) if args
+    puts options
+
     reporter.start
 
     suites = Runnable.runnables.shuffle
@@ -96,6 +128,12 @@ module Minitest
   ensure
     after_run.each(&.call)
     reporter.passed?
+  end
+
+  private def self.set_random_seed
+    seed = options.seed
+    static_array = pointerof(seed).as(StaticArray(UInt8, 4)*).value
+    Random::DEFAULT.new_seed(static_array)
   end
 
   def self.after_run
