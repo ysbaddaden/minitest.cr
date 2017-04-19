@@ -10,10 +10,12 @@ module Minitest
     property verbose
     property threads
     getter pattern : String | Regex | Nil
+    getter seed : UInt32
 
     def initialize
       @verbose = false
       @threads = 1
+      @seed = (ENV["SEED"]?.try(&.to_u32) || Random::Secure.rand(UInt32::MIN..UInt32::MAX)) & 0xFFFF
     end
 
     def pattern=(pattern)
@@ -22,6 +24,31 @@ module Minitest
       else
         @pattern = pattern
       end
+    end
+
+    def seed=(seed)
+      @seed = seed.to_u32 & 0xFFFF
+    end
+
+    def to_s(io)
+      io << "Run options: --seed "
+      seed.to_s(io)
+
+      if verbose
+        io << " --verbose"
+      end
+
+      if threads = @threads
+        io << " --parallel "
+        threads.to_s(io)
+      end
+
+      if pattern = @pattern
+        io << " --name "
+        pattern.to_s(io)
+      end
+
+      io << "\n"
     end
   end
 
@@ -36,6 +63,10 @@ module Minitest
       opts.on("-h", "--help", "Display this help") do
         puts opts
         exit
+      end
+
+      opts.on("-s SEED", "--seed SEED", "Sets random seed. Also via SEED environment variable.") do |seed|
+        options.seed = seed.to_u32
       end
 
       opts.on("-v", "--verbose", "Show progress processing files.") do
@@ -67,9 +98,11 @@ module Minitest
 
   def self.run(args = nil)
     process_args(args) if args
-    reporter.start
+    puts options
 
     Runnable.runnables.each(&.collect_tests)
+    Random::DEFAULT.new_seed(options.seed.to_u64)
+    Runnable.tests.shuffle!
 
     channel = Channel::Buffered(Runnable::Data | Nil).new
     completed = Channel(Nil).new
@@ -88,7 +121,9 @@ module Minitest
       end
     end
 
-    Runnable.tests.shuffle.each do |test|
+    reporter.start
+
+    Runnable.tests.each do |test|
       channel.send(test)
     end
 
