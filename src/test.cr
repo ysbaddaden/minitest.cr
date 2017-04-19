@@ -25,20 +25,25 @@ module Minitest
     include LifecycleHooks
     include Assertions
 
+    # Builds, at compile time, an Array with the test method name (String) and a
+    # proc to call that method. The Array will then be shuffled at runtime.
     def self.run_tests(reporter)
       {% begin %}
-        {% names = @type.methods.map(&.name).select(&.starts_with?("test_")) %}
+        tests = [] of {String, Proc({{ @type }}, Nil)}
 
-        {% for name in names.shuffle %}
-          %test = new(reporter)
-          %test.run_one({{ name.stringify }}) { %test.{{ name }} }
+        {% for name in @type.methods.map(&.name).select(&.starts_with?("test_")) %}
+          %proc =->(test : {{ @type }}) { test.{{ name }}; nil }
+          tests << { {{ name.stringify }}, %proc }
         {% end %}
-      {% end %}
 
+        tests.shuffle.each do |(name, proc)|
+          new(reporter).run_one(name, proc)
+        end
+      {% end %}
       nil
     end
 
-    def run_one(name)
+    def run_one(name, proc)
       case pattern = reporter.options.pattern
       when Regex  then return unless name =~ pattern
       when String then return unless name == pattern
@@ -51,8 +56,7 @@ module Minitest
           before_setup
           setup
           after_setup
-
-          yield
+          proc.call(self)
         end
 
         capture_exception(result) { before_teardown }
