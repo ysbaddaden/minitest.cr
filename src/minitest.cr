@@ -69,26 +69,32 @@ module Minitest
     process_args(args) if args
     reporter.start
 
-    suites = Runnable.runnables.shuffle
-    count = suites.size < options.threads ? suites.size : options.threads
-    completed = 0
+    Runnable.runnables.each(&.collect_tests)
 
-    count.times do
+    channel = Channel::Buffered(Runnable::Data | Nil).new
+    completed = Channel(Nil).new
+
+    options.threads.times do
       spawn do
         loop do
-          if suite = suites.pop?
-            suite.run(reporter)
-            completed += 1
+          if test = channel.receive
+            suite, name, proc = test
+            suite.new(reporter).run_one(name, proc)
           else
+            completed.send(nil)
             break
           end
         end
       end
     end
 
-    loop do
-      sleep 0.001
-      break if completed >= Runnable.runnables.size
+    Runnable.tests.shuffle.each do |test|
+      channel.send(test)
+    end
+
+    options.threads.times do
+      channel.send(nil)
+      completed.receive
     end
 
     reporter.report
