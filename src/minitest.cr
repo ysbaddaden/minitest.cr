@@ -99,6 +99,7 @@ module Minitest
     process_args(args) if args
     puts options
 
+    set_random_seed
     reporter.start
 
     suites = Runnable.runnables.shuffle
