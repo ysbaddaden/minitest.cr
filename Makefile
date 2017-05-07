@@ -1,4 +1,4 @@
-CRYSTAL_BIN ?= = `which crystal`
+CRYSTAL_BIN ?= `which crystal`
 
 .PHONY: test
 
