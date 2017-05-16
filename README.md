@@ -84,20 +84,20 @@ expect(meme.will_it_blend?).wont_match(/^no/i)
 Eventually run the tests:
 
 ```
-$ crystal test/meme_test.cr spec/meme_spec.cr -- --verbose
+$ crystal run test/meme_test.cr spec/meme_spec.cr -- --verbose
 ```
 
 You may filter your tests using an exact test name, or a regexp:
 
 ```
-$ crystal test/meme_test.cr -- -n test_that_kitty_can_eat
-$ crystal test/meme_test.cr -- -n /will/
+$ crystal run test/meme_test.cr -- -n test_that_kitty_can_eat
+$ crystal run test/meme_test.cr -- -n /will/
 ```
 
 When using Minitest::Spec with assertions or the `expect` syntax, you can avoid to taint Object with all the `#must_` and `#wont_` expectations:
 
 ```
-$ crystal -Dmt_no_expectations spec/meme_spec.cr
+$ crystal run -Dmt_no_expectations spec/meme_spec.cr
 ```
 
 ## License
