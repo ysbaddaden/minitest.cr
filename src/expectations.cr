@@ -91,11 +91,11 @@ module Minitest
     end
 
     def must_equal(expected, message = nil, file = __FILE__, line = __LINE__)
-      assert_equal(@target, expected, message, file, line)
+      assert_equal(expected, @target, message, file, line)
     end
 
     def wont_equal(expected, message = nil, file = __FILE__, line = __LINE__)
-      refute_equal(@target, expected, message, file, line)
+      refute_equal(expected, @target, message, file, line)
     end
 
     def must_be_close_to(expected, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
