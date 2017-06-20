@@ -35,6 +35,8 @@ module Minitest
         {% end %}
       {% end %}
 
+      after_all
+
       nil
     end
 

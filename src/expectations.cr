@@ -74,6 +74,22 @@ module Minitest
     def wont_be_same_as(expected, message = nil, file = __FILE__, line = __LINE__)
       Expectation.new(self).wont_be_same_as(expected, message, file, line)
     end
+
+    def must_match_array(array, message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).must_match_array(array, message, file, line)
+    end
+
+    def wont_match_array(array, message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).wont_match_array(array, message, file, line)
+    end
+
+    def must_be_truthy(message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).must_be_truthy(message, file, line)
+    end
+
+    def must_be_falsey(message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).must_be_falsey(message, file, line)
+    end
   end
 
   class Expectation(T)
@@ -152,6 +168,46 @@ module Minitest
 
     def wont_be_same_as(expected, message = nil, file = __FILE__, line = __LINE__)
       refute_same(@target, expected, message, file, line)
+    end
+
+    def must_change(message = nil, file = __FILE__, line = __LINE__, **opts)
+      if opts.empty?
+        assert_changes(@target, message, file, line) { yield }
+      elsif opts.has_key?(:by)
+        assert_changes(@target, opts[:by]?, message, file, line) { yield }
+      elsif opts.has_key?(:from) && opts.has_key?(:from)
+        assert_changes(@target, opts[:from]?, opts[:to]?, message, file, line) { yield }
+      else
+        raise "Unknown change matcher arguments (#{opts.inspect})."
+      end
+    end
+
+    def must_change_at_least(by, message = nil, file = __FILE__, line = __LINE__, &block)
+      assert_changes_at_least(@target, by, message, file, line) { yield }
+    end
+
+    def must_change_at_most(by, message = nil, file = __FILE__, line = __LINE__, &block)
+      assert_changes_at_most(@target, by, message, file, line) { yield }
+    end
+
+    def wont_change(message = nil, file = __FILE__, line = __LINE__, &block)
+      refute_changes(@target, message, file, line) { yield }
+    end
+
+    def must_match_array(array, message = nil, file = __FILE__, line = __LINE__)
+      assert_matches_array(array, @target, message, file, line)
+    end
+
+    def wont_match_array(array, message = nil, file = __FILE__, line = __LINE__)
+      refute_matches_array(array, @target, message, file, line)
+    end
+
+    def must_be_truthy(message = nil, file = __FILE__, line = __LINE__)
+      assert_truthy(@target, message, file, line)
+    end
+
+    def must_be_falsey(message = nil, file = __FILE__, line = __LINE__)
+      assert_falsey(@target, message, file, line)
     end
   end
 end

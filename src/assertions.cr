@@ -288,6 +288,115 @@ module Minitest
       end
     end
 
+    def assert_changes(proc, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      msg = ->{ message || "Expected #{first_attempt} to be changed, but got #{second_attempt}" }
+      assert first_attempt != second_attempt, msg, file, line
+    end
+
+    def assert_changes(proc, by, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      msg = ->{ message || "Expected #{first_attempt} to be changed by #{by}, but got #{second_attempt}" }
+      assert (second_attempt - first_attempt) == by, msg, file, line
+    end
+
+    def assert_changes_at_least(proc, by, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      msg = ->{ message || "Expected #{first_attempt} to be changed at least by #{by}, but got #{second_attempt}" }
+      assert (second_attempt - first_attempt) >= by, msg, file, line
+    end
+
+    def assert_changes_at_most(proc, by, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      msg = ->{ message || "Expected #{first_attempt} to be changed at most by #{by}, but got #{second_attempt}" }
+      assert (second_attempt - first_attempt) <= by, msg, file, line
+    end
+
+    def assert_changes(proc, from, to, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_equal(from, first_attempt, message, file, line)
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      assert_equal(to, second_attempt, message, file, line)
+    end
+
+    def refute_changes(proc, message : String? = nil, file = __FILE__, line = __LINE__, &block)
+      first_attempt = yield
+      assert_responds_to(proc, :call, nil, file, line)
+      proc.call
+      second_attempt = yield
+      msg = ->{ message || "Expected #{first_attempt} not to be changed, but got #{second_attempt}" }
+      assert first_attempt == second_attempt, msg, file, line
+    end
+
+    macro assert_instance_of(obj, klass, message = nil, file = __FILE__, line = __LINE__)
+      %value = {{obj}}
+      %msg = -> { {{message}} || "Expected #{ %value.inspect} to be instance of class #{ {{klass}} }" }
+      assert %value.is_a?({{klass}}), %msg, {{file}}, {{line}}
+    end
+
+    macro refute_instance_of(obj, klass, message = nil, file = __FILE__, line = __LINE__)
+      %value = {{obj}}
+      %msg = -> { {{message}} || "Expected #{ %value.inspect} not to be instance of class #{ {{klass}} }" }
+      refute %value.is_a?({{klass}}), %msg, {{file}}, {{line}}
+    end
+
+    def assert_matches_array(expected, actual, message = nil, file = __FILE__, line = __LINE__)
+      msg = ->{
+        if need_diff?(expected, actual)
+          result = diff(expected, actual)
+          if result.empty?
+            "No visual difference found. Maybe expected class '#{expected.class.name}' isn't comparable to actual class '#{actual.class.name}' ?"
+          else
+            result
+          end
+        else
+          message || "Expected #{actual.inspect} to contain exactly #{expected.inspect}"
+        end
+      }
+      assert expected.size == actual.size, msg, file, line
+      assert expected.all? { |e| actual.includes?(e) }, msg, file, line
+    end
+
+    def refute_matches_array(expected, actual, message = nil, file = __FILE__, line = __LINE__)
+      msg = ->{
+        if need_diff?(expected, actual)
+          result = diff(expected, actual)
+          if result.empty?
+            "No visual difference found. Maybe expected class '#{expected.class.name}' isn't comparable to actual class '#{actual.class.name}' ?"
+          else
+            result
+          end
+        else
+          message || "Expected #{actual.inspect} not to contain exactly #{expected.inspect}"
+        end
+      }
+
+      refute expected.size == actual.size && expected.all? { |e| actual.includes?(e) }, msg, file, line
+    end
+
+    def assert_truthy(expected, message = nil, file = __FILE__, line = __LINE__)
+      msg = ->{ message || "Expected #{expected} to be truthy" }
+      assert !!expected, msg, file, line
+    end
+
+    def assert_falsey(expected, message = nil, file = __FILE__, line = __LINE__)
+      msg = ->{ message || "Expected #{expected} to be falsey" }
+      refute !!expected, msg, file, line
+    end
 
     def skip(message = "", file = __FILE__, line = __LINE__)
       raise Minitest::Skip.new(message.to_s, file: file, line: line)

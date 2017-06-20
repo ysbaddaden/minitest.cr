@@ -18,5 +18,8 @@ module Minitest
 
     def self.run_tests(reporter)
     end
+
+    def self.after_all
+    end
   end
 end
