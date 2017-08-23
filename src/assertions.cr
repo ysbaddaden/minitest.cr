@@ -73,7 +73,7 @@ module Minitest
       a = Tempfile.open("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
       b = Tempfile.open("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
 
-      Process.run("diff", {"-u", a.path, b.path}, output: nil) do |process|
+      Process.run("diff", {"-u", a.path, b.path}) do |process|
         process.output.gets_to_end
           .sub(/^--- [^\n]*/m, "--- expected")
           .sub(/^\+\+\+ [^\n]*/m, "+++ actual")
