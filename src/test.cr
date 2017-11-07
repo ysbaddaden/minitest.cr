@@ -45,21 +45,21 @@ module Minitest
       end
 
       result = Result.new(self.class.name, name)
-      start_time = Time.now
 
-      capture_exception(result) do
-        before_setup
-        setup
-        after_setup
+      result.time = Time.measure do
+        capture_exception(result) do
+          before_setup
+          setup
+          after_setup
 
-        yield
+          yield
+        end
+
+        capture_exception(result) { before_teardown }
+        capture_exception(result) { teardown }
+        capture_exception(result) { after_teardown }
       end
 
-      capture_exception(result) { before_teardown }
-      capture_exception(result) { teardown }
-      capture_exception(result) { after_teardown }
-
-      result.time = Time.now - start_time
       reporter.record(result)
     end
 

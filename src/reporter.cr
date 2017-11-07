@@ -84,12 +84,12 @@ module Minitest
       @failures = 0
       @errors = 0
       @skips = 0
-      @start_time = uninitialized Time # avoid nilable
+      @start_time = uninitialized Time::Span # avoid nilable
       @total_time = uninitialized Time::Span # avoid nilable
     end
 
     def start
-      @start_time = Time.now
+      @start_time = Time.monotonic
     end
 
     def record(result)
@@ -98,7 +98,7 @@ module Minitest
     end
 
     def report
-      @total_time = Time.new - start_time
+      @total_time = Time.monotonic - start_time
       @failures = results.count(&.failure.is_a?(Assertion))
       @errors = results.count(&.failure.is_a?(UnexpectedError))
       @skips = results.count(&.failure.is_a?(Skip))

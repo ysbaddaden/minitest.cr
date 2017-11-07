@@ -1,7 +1,7 @@
-CRYSTAL_BIN ?= `which crystal`
+CRYSTAL ?= `which crystal`
 
 .PHONY: test
 
 test:
-	$(CRYSTAL_BIN) run test/*_test.cr -- --parallel 4 --verbose
+	$(CRYSTAL) run test/*_test.cr -- --parallel 4 --verbose
 
