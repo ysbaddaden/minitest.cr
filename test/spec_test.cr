@@ -10,6 +10,7 @@ describe Minitest::Spec do
   end
 
   let(:data) { "data value" }
+  let(:random, Float64) { rand }
 
   it "accepts a block" do
     assert true
@@ -19,7 +20,7 @@ describe Minitest::Spec do
 
   it("reports the original failure location") do
     ex = assert_raises(Minitest::Assertion) { assert false }
-    assert_equal("test/spec_test.cr:21", ex.location)
+    assert_equal("test/spec_test.cr:22", ex.location)
   end
 
   it "calls an instance method" do
@@ -36,6 +37,7 @@ describe Minitest::Spec do
     it "accesses let methods" do
       assert_equal "data value", data
       assert_equal "more data value", more
+      random
     end
   end
 
@@ -61,5 +63,9 @@ describe Minitest::Spec do
       expect(1).must_equal(1)
       expect(Foo.new).wont_be_same_as(Foo.new)
     end
+  end
+
+  xit "ignores nested code" do
+    1 / 0
   end
 end

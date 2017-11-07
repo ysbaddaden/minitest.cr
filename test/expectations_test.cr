@@ -91,4 +91,70 @@ class ExpectationsTest < Minitest::Spec
     1.wont_be_nil
     assert_raises(Minitest::Assertion) { nil.wont_be_nil }
   end
+
+  it "must_change" do
+    i = 0
+    expect { i += 1 }.must_change { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 - 2 }.must_change { i } }
+  end
+
+  it "must_change with by" do
+    i = 0
+    expect { i += 1 }.must_change(by: 1) { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 }.must_change(by: 1) { i } }
+  end
+
+  it "must_change_at_least" do
+    i = 0
+    expect { i += 3 }.must_change_at_least(1) { i }
+    expect { i += 1 }.must_change_at_least(1) { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 }.must_change_at_least(3) { i } }
+  end
+
+  it "must_change_at_most" do
+    i = 0
+    expect { i += 1 }.must_change_at_most(1) { i }
+    expect { i += 2 }.must_change_at_most(3) { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 }.must_change_at_most(1) { i } }
+  end
+
+  it "must_change with from and to args" do
+    i = 0
+    expect { i += 1 }.must_change(from: 0, to: 1) { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 }.must_change(from: 0, to: 1) { i } }
+  end
+
+  it "wont_change" do
+    i = 0
+    expect { i += 0 }.wont_change { i }
+    assert_raises(Minitest::Assertion) { expect { i += 2 }.wont_change { i } }
+  end
+
+  it "must_match_array" do
+    [1, 2, 3].must_match_array([3, 2, 1])
+    assert_raises(Minitest::Assertion) { [1, 2, 3].must_match_array([3, 2]) }
+  end
+
+  it "wont_match_array" do
+    [1, 2, 3].wont_match_array([3, 2])
+    assert_raises(Minitest::Assertion) { [1, 2, 3].wont_match_array([3, 2, 1]) }
+  end
+
+  it "must_be_truthy" do
+    true.must_be_truthy
+    1.must_be_truthy
+    "".must_be_truthy
+    ([] of String)..must_be_truthy
+    ({} of String => String).must_be_truthy
+    Foo.new.must_be_truthy
+    assert_raises(Minitest::Assertion) { false.must_be_truthy }
+    assert_raises(Minitest::Assertion) { nil.must_be_truthy }
+  end
+
+  it "must_be_falsey" do
+    false.must_be_falsey
+    nil.must_be_falsey
+    assert_raises(Minitest::Assertion) { true.must_be_falsey }
+    assert_raises(Minitest::Assertion) { Foo.new.must_be_falsey }
+  end
 end

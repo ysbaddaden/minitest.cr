@@ -8,6 +8,13 @@ module Minitest
       end
     end
 
+    macro let(name, klass, &block)
+      @{{name.id}} : {{klass}}?
+      def {{ name.id }}
+        @{{ name.id }} ||= begin; {{ yield }}; end
+      end
+    end
+
     macro before(&block)
       def setup
         super()
@@ -45,8 +52,18 @@ module Minitest
       end
     end
 
+    macro xit(name = "anonymous", &block)
+    end
+
+    macro describe(name = "anonymous", &block)
+    end
+
     def expect(value)
       Expectation.new(value)
+    end
+
+    def expect(&block)
+      Expectation.new(block)
     end
   end
 end
@@ -55,10 +72,10 @@ end
 macro describe(name, &block)
   {%
     class_name = name.id.stringify
-      .gsub(/[^0-9a-zA-Z:]+/, "_")
-      .gsub(/^_|_$/, "")
-      .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
-      .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
+                        .gsub(/[^0-9a-zA-Z:]+/, "_")
+                        .gsub(/^_|_$/, "")
+                        .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
+                                                                                    .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
   %}
   class {{ class_name.id }}Spec < Minitest::Spec
     def self.name

@@ -3,6 +3,8 @@ require "../src/autorun"
 class AssertionsTest < Minitest::Test
   class Failure < Exception; end
   class Foo; end
+  class Bar; end
+  class Son < Foo; end
 
   def test_assert
     assert true
@@ -174,6 +176,83 @@ class AssertionsTest < Minitest::Test
     assert_match "Exception", ex.message
   end
 
+  def test_assert_changes
+    i = 0
+    assert_changes(->{ i += 1 }) { i }
+    assert_raises(Minitest::Assertion) { assert_changes(->{ i += 2 - 2 }) { i } }
+  end
+
+  def test_assert_changes_by
+    i = 0
+    assert_changes(->{ i += 1 }, 1) { i }
+    assert_raises(Minitest::Assertion) { assert_changes(->{ i += 2 }, 1) { i } }
+  end
+
+  def test_assert_changes_at_least_by
+    i = 0
+    assert_changes_at_least(->{ i += 3 }, 1) { i }
+    assert_changes_at_least(->{ i += 1 }, 1) { i }
+    assert_raises(Minitest::Assertion) { assert_changes_at_least(->{ i += 2 }, 3) { i } }
+  end
+
+  def test_assert_changes_at_most_by
+    i = 0
+    assert_changes_at_most(->{ i += 1 }, 1) { i }
+    assert_changes_at_most(->{ i += 2 }, 3) { i }
+    assert_raises(Minitest::Assertion) { assert_changes_at_most(->{ i += 2 }, 1) { i } }
+  end
+
+  def test_assert_changes_from_to
+    i = 0
+    assert_changes(->{ i += 1 }, 0, 1) { i }
+    assert_raises(Minitest::Assertion) { assert_changes(->{ i += 2 }, 0, 1) { i } }
+  end
+
+  def test_refute_changes
+    i = 0
+    refute_changes(->{ i += 0 }) { i }
+    assert_raises(Minitest::Assertion) { refute_changes(->{ i += 2 }) { i } }
+  end
+
+  def test_assert_instance_of
+    assert_instance_of Foo.new, Foo
+    assert_instance_of Son.new, Foo
+    assert_raises(Minitest::Assertion) { assert_instance_of Bar.new, Foo }
+  end
+
+  def test_refute_instance_of
+    refute_instance_of Bar.new, Foo
+    assert_raises(Minitest::Assertion) { refute_instance_of Son.new, Foo }
+    assert_raises(Minitest::Assertion) { refute_instance_of Foo.new, Foo }
+  end
+
+  def test_assert_matches_array
+    assert_matches_array [1, 2, 3], [3, 2, 1]
+    assert_raises(Minitest::Assertion) { assert_matches_array [1, 2, 3], [3, 2] }
+  end
+
+  def test_refute_matches_array
+    refute_matches_array [1, 2, 3], [3, 2]
+    assert_raises(Minitest::Assertion) { refute_matches_array [1, 2, 3], [3, 2, 1] }
+  end
+
+  def test_assert_truthy
+    assert_truthy true
+    assert_truthy 1
+    assert_truthy ""
+    assert_truthy [] of String
+    assert_truthy({} of String => String)
+    assert_truthy Foo.new
+    assert_raises(Minitest::Assertion) { assert_truthy false }
+    assert_raises(Minitest::Assertion) { assert_truthy nil }
+  end
+
+  def test_assert_falsey
+    assert_falsey false
+    assert_falsey nil
+    assert_raises(Minitest::Assertion) { assert_falsey true }
+    assert_raises(Minitest::Assertion) { assert_falsey Foo.new }
+  end
 
   def test_skip
     ex = assert_raises(Minitest::Skip) { skip }
