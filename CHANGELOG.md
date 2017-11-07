@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.3.6
+
+Changes:
+- Measure elapsed time using monotonic clock.
+
+Fixes:
+- Compatibility with Crystal 0.24.0
+
 ## v0.3.5
 
 Changes:
