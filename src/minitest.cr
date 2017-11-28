@@ -110,8 +110,7 @@ module Minitest
     process_args(args) if args
     puts options
 
-    Random::DEFAULT.new_seed(options.seed.to_u64)
-
+    random = Random::PCG32.new(options.seed.to_u64)
     channel = Channel::Buffered(Array(Runnable::Data) | Runnable::Data | Nil).new
     completed = Channel(Nil).new
 
@@ -144,14 +143,14 @@ module Minitest
       Runnable.runnables.each do |suite|
         tests += suite.collect_tests
       end
-      tests.shuffle!
+      tests.shuffle!(random)
       tests.each { |test| channel.send(test) }
     else
       # shufle each suite, then shuffle tests for each suite:
-      Runnable.runnables.shuffle!
+      Runnable.runnables.shuffle!(random)
       Runnable.runnables.each do |suite|
         tests = suite.collect_tests
-        tests.shuffle!
+        tests.shuffle!(random)
         tests.each { |test| channel.send(test) }
       end
     end
