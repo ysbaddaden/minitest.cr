@@ -7,12 +7,14 @@ require "./spec"
 
 module Minitest
   class Options
+    property chaos
     property verbose
     property threads
     getter pattern : String | Regex | Nil
     getter seed : UInt32
 
     def initialize
+      @chaos = false
       @verbose = false
       @threads = 1
       @seed = (ENV["SEED"]?.try(&.to_u32) || Random::Secure.rand(UInt32::MIN..UInt32::MAX)) & 0xFFFF
@@ -36,6 +38,10 @@ module Minitest
 
       if verbose
         io << " --verbose"
+      end
+
+      if chaos
+        io << " --chaos"
       end
 
       if threads = @threads
@@ -77,6 +83,10 @@ module Minitest
         options.threads = threads.to_i
       end
 
+      opts.on("-c", "--chaos", "Shuffle all tests from all test suites.") do
+        options.chaos = true
+      end
+
       opts.on("-n PATTERN", "--name PATTERN", "Filter run on /pattern/ or string.") do |pattern|
         options.pattern = pattern
       end
@@ -100,18 +110,23 @@ module Minitest
     process_args(args) if args
     puts options
 
-    Runnable.runnables.each(&.collect_tests)
     Random::DEFAULT.new_seed(options.seed.to_u64)
-    Runnable.tests.shuffle!
 
-    channel = Channel::Buffered(Runnable::Data | Nil).new
+    channel = Channel::Buffered(Array(Runnable::Data) | Runnable::Data | Nil).new
     completed = Channel(Nil).new
 
     options.threads.times do
       spawn do
         loop do
-          if test = channel.receive
-            suite, name, proc = test
+          value = channel.receive
+          case value
+          when Array
+            value.each do |test|
+              suite, name, proc = test
+              suite.new(reporter).run_one(name, proc)
+            end
+          when Runnable::Data
+            suite, name, proc = value
             suite.new(reporter).run_one(name, proc)
           else
             completed.send(nil)
@@ -123,8 +138,22 @@ module Minitest
 
     reporter.start
 
-    Runnable.tests.each do |test|
-      channel.send(test)
+    if options.chaos
+      # collect & shuffle all tests for all suites:
+      tests = [] of Runnable::Data
+      Runnable.runnables.each do |suite|
+        tests += suite.collect_tests
+      end
+      tests.shuffle!
+      tests.each { |test| channel.send(test) }
+    else
+      # shufle each suite, then shuffle tests for each suite:
+      Runnable.runnables.shuffle!
+      Runnable.runnables.each do |suite|
+        tests = suite.collect_tests
+        tests.shuffle!
+        tests.each { |test| channel.send(test) }
+      end
     end
 
     options.threads.times do
