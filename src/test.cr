@@ -25,20 +25,7 @@ module Minitest
     include LifecycleHooks
     include Assertions
 
-    def self.run_tests(reporter)
-      {% begin %}
-        {% names = @type.methods.map(&.name).select(&.starts_with?("test_")) %}
-
-        {% for name in names.shuffle %}
-          %test = new(reporter)
-          %test.run_one({{ name.stringify }}) { %test.{{ name }} }
-        {% end %}
-      {% end %}
-
-      nil
-    end
-
-    def run_one(name)
+    def run_one(name, proc)
       case pattern = reporter.options.pattern
       when Regex  then return unless name =~ pattern
       when String then return unless name == pattern
@@ -51,8 +38,7 @@ module Minitest
           before_setup
           setup
           after_setup
-
-          yield
+          proc.call(self)
         end
 
         capture_exception(result) { before_teardown }

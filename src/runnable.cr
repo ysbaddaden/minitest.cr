@@ -6,17 +6,30 @@ module Minitest
       {% end %}
     end
 
-    def self.run(reporter)
-      {{ @type }}.run_tests(reporter)
-      nil
+    alias Data = {Test.class, String, Proc(Test, Nil)}
+
+    # Builds, at compile time, an Array with the test class, the test method
+    # name, and a proc to call that method. The Array will then be shuffled at
+    # runtime.
+    def self.collect_tests : Array(Runnable::Data)
+      tests = [] of Runnable::Data
+
+      {% begin %}
+        {% for name in @type.methods.map(&.name).select(&.starts_with?("test_")) %}
+          %proc = ->(test : Test) {
+            test.as({{ @type }}).{{ name }}
+            nil
+          }
+          tests << { {{ @type }}, {{ name.stringify }}, %proc }
+        {% end %}
+      {% end %}
+
+      tests
     end
 
     getter reporter : AbstractReporter
 
     def initialize(@reporter)
-    end
-
-    def self.run_tests(reporter)
     end
   end
 end

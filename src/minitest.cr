@@ -7,13 +7,17 @@ require "./spec"
 
 module Minitest
   class Options
+    property chaos
     property verbose
     property threads
     getter pattern : String | Regex | Nil
+    getter seed : UInt32
 
     def initialize
+      @chaos = false
       @verbose = false
       @threads = 1
+      @seed = (ENV["SEED"]?.try(&.to_u32) || Random::Secure.rand(UInt32::MIN..UInt32::MAX)) & 0xFFFF
     end
 
     def pattern=(pattern)
@@ -22,6 +26,35 @@ module Minitest
       else
         @pattern = pattern
       end
+    end
+
+    def seed=(seed)
+      @seed = seed.to_u32 & 0xFFFF
+    end
+
+    def to_s(io)
+      io << "Run options: --seed "
+      seed.to_s(io)
+
+      if verbose
+        io << " --verbose"
+      end
+
+      if chaos
+        io << " --chaos"
+      end
+
+      if threads = @threads
+        io << " --parallel "
+        threads.to_s(io)
+      end
+
+      if pattern = @pattern
+        io << " --name "
+        pattern.to_s(io)
+      end
+
+      io << "\n"
     end
   end
 
@@ -38,12 +71,20 @@ module Minitest
         exit
       end
 
+      opts.on("-s SEED", "--seed SEED", "Sets random seed. Also via SEED environment variable.") do |seed|
+        options.seed = seed.to_u32
+      end
+
       opts.on("-v", "--verbose", "Show progress processing files.") do
         options.verbose = true
       end
 
       opts.on("-p THREADS", "--parallel THREADS", "Parallelize runs.") do |threads|
         options.threads = threads.to_i
+      end
+
+      opts.on("-c", "--chaos", "Shuffle all tests from all test suites.") do
+        options.chaos = true
       end
 
       opts.on("-n PATTERN", "--name PATTERN", "Filter run on /pattern/ or string.") do |pattern|
@@ -67,28 +108,56 @@ module Minitest
 
   def self.run(args = nil)
     process_args(args) if args
-    reporter.start
+    puts options
 
-    suites = Runnable.runnables.shuffle
-    count = suites.size < options.threads ? suites.size : options.threads
-    completed = 0
+    random = Random::PCG32.new(options.seed.to_u64)
+    channel = Channel::Buffered(Array(Runnable::Data) | Runnable::Data | Nil).new
+    completed = Channel(Nil).new
 
-    count.times do
+    options.threads.times do
       spawn do
         loop do
-          if suite = suites.pop?
-            suite.run(reporter)
-            completed += 1
+          value = channel.receive
+          case value
+          when Array
+            value.each do |test|
+              suite, name, proc = test
+              suite.new(reporter).run_one(name, proc)
+            end
+          when Runnable::Data
+            suite, name, proc = value
+            suite.new(reporter).run_one(name, proc)
           else
+            completed.send(nil)
             break
           end
         end
       end
     end
 
-    loop do
-      sleep 0.001
-      break if completed >= Runnable.runnables.size
+    reporter.start
+
+    if options.chaos
+      # collect & shuffle all tests for all suites:
+      tests = [] of Runnable::Data
+      Runnable.runnables.each do |suite|
+        tests += suite.collect_tests
+      end
+      tests.shuffle!(random)
+      tests.each { |test| channel.send(test) }
+    else
+      # shufle each suite, then shuffle tests for each suite:
+      Runnable.runnables.shuffle!(random)
+      Runnable.runnables.each do |suite|
+        tests = suite.collect_tests
+        tests.shuffle!(random)
+        tests.each { |test| channel.send(test) }
+      end
+    end
+
+    options.threads.times do
+      channel.send(nil)
+      completed.receive
     end
 
     reporter.report
