@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Unreleased
+
+Changes:
+- Add `--chaos` to merge & shuffle all tests from all suites,
+  instead of shuffling suites then shuffling tests for each suite;
+- Add `--seed SEED` for reproducible test runs (can also be set
+  with `SEED` environment variable).
+
 ## v0.3.6
 
 Changes:
