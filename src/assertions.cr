@@ -262,29 +262,24 @@ module Minitest
       begin
         yield
       rescue ex
-        return ex
+        ex
+      else
+        message ||= "Expected an exception but nothing was raised"
+        raise Assertion.new(message, file: file, line: line)
       end
-      raise Assertion.new(
-        message || "Expected an exception but nothing was raised",
-        file: file, line: line
-      )
     end
 
-    macro assert_raises(klass, file = __FILE__, line = __LINE__)
+    def assert_raises(klass : T.class, file = __FILE__, line = __LINE__) forall T
       begin
-        {{ yield }}
-      rescue %ex : {{ klass.id }}
-        %ex
-      rescue %ex
-        raise Minitest::Assertion.new(
-          "Expected #{ {{ klass.id }} } but #{ %ex.class.name } was raised",
-          file: {{ file }}, line: {{ line }}
-        )
+        yield
+      rescue ex : T
+        ex
+      rescue ex
+        message = "Expected #{ T.name } but #{ ex.class.name } was raised"
+        raise Assertion.new(message, file: file, line: line)
       else
-        raise Minitest::Assertion.new(
-          "Expected #{ {{ klass.id }} } but nothing was raised",
-          file: {{ file }}, line: {{ line }}
-        )
+        message = "Expected #{ T.name } but nothing was raised"
+        raise Assertion.new(message, file: file, line: line)
       end
     end
 
