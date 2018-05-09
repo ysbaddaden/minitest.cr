@@ -4,4 +4,4 @@ crystal:
   - nightly
 
 script:
-  - make
+  - make test
