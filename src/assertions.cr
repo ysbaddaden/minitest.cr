@@ -80,8 +80,8 @@ module Minitest
           .strip
       end
     ensure
-      if a; a.unlink; end
-      if b; b.unlink; end
+      if a; a.delete; end
+      if b; b.delete; end
     end
 
     def assert(actual, message = nil, file = __FILE__, line = __LINE__)
