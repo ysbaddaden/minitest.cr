@@ -2,3 +2,6 @@ language: crystal
 crystal:
   - latest
   - nightly
+
+script:
+  - make
