@@ -1,7 +1,8 @@
-CRYSTAL ?= `which crystal`
+.POSIX:
 
-.PHONY: test
+CRYSTAL = crystal
 
-test:
+test: .phony
 	$(CRYSTAL) run test/*_test.cr -- --chaos --parallel 4 --verbose
 
+.phony:
