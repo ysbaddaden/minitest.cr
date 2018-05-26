@@ -3,6 +3,7 @@ require "../src/autorun"
 class AssertionsTest < Minitest::Test
   class Failure < Exception; end
   class Foo; end
+  class Bar; end
 
   def test_assert
     assert true
@@ -150,6 +151,17 @@ class AssertionsTest < Minitest::Test
   def test_refute_includes
     refute_includes [1, 2, 3], 4
     assert_raises(Minitest::Assertion) { refute_includes [1, 2], 2 }
+  end
+
+
+  def test_assert_instance_of
+    assert_instance_of Foo, Foo.new
+    assert_raises(Minitest::Assertion) { assert_instance_of Bar, Foo.new }
+  end
+
+  def test_refute_instance_of
+    refute_instance_of Bar, Foo.new
+    assert_raises(Minitest::Assertion) { refute_instance_of Foo, Foo.new }
   end
 
 

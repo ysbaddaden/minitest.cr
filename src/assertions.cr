@@ -247,6 +247,17 @@ module Minitest
     end
 
 
+    def assert_instance_of(cls, obj, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { message || "Expected #{obj.inspect} to be an instance of #{cls.name}, not #{obj.class.name}" }
+      assert cls === obj, msg, file, line
+    end
+
+    def refute_instance_of(cls, obj, message = nil, file = __FILE__, line = __LINE__)
+      msg = -> { message || "Expected #{obj.inspect} to not be an instance of #{cls.name}" }
+      refute cls === obj, msg, file, line
+    end
+
+
     macro assert_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
       %msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
       assert {{ obj }}.responds_to?(:{{ method.id }}), %msg, file, line
