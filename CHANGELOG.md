@@ -1,8 +1,11 @@
 # CHANGELOG
 
-## Unreleased
+## v4.0.0
 
-Changes:
+Features:
+- Add `assert_instance_of`, `refute_instance_of` assertions;
+- Add `must_be_instance_of`, `wont_be_instance_of` expectations;
+- Add `capture_io`, `assert_silent`, `assert_output` assertions.
 - Add `--chaos` to merge & shuffle all tests from all suites,
   instead of shuffling suites then shuffling tests for each suite;
 - Add `--seed SEED` for reproducible test runs (can also be set
