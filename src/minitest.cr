@@ -51,7 +51,7 @@ module Minitest
 
       if pattern = @pattern
         io << " --name "
-        pattern.to_s(io)
+        pattern.inspect(io)
       end
 
       io << "\n"
