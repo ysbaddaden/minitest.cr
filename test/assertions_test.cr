@@ -187,6 +187,106 @@ class AssertionsTest < Minitest::Test
   end
 
 
+  def test_capture_io
+    # captures io (and flushes):
+    output, error = capture_io do
+      STDOUT << "hello world"
+      STDERR << "failed hello"
+    end
+    assert_equal "hello world", output
+    assert_equal "failed hello", error
+
+    # captures long output without blocking:
+    bytes = Bytes.new(2 * 1024 * 1024)
+    Random::Secure.random_bytes(bytes)
+
+    output, error = capture_io do
+      STDOUT.write bytes
+      STDERR.write bytes
+    end
+    assert_equal bytes, output.to_slice
+    assert_equal bytes, error.to_slice
+  end
+
+  def test_assert_silent
+    assert_silent { }
+    assert_raises(Minitest::Assertion) { assert_silent { STDOUT << "hello" } }
+    assert_raises(Minitest::Assertion) { assert_silent { STDERR << "world" } }
+  end
+
+  def test_assert_output
+    assert_output("hello", "world") do
+      STDOUT << "hello"
+      STDERR << "world"
+    end
+
+    assert_output(stdout: "hello") do
+      STDOUT << "hello"
+      STDERR << "world"
+    end
+
+    assert_output(stderr: "world") do
+      STDOUT << "hello"
+      STDERR << "world"
+    end
+
+    assert_output(stdout: /hello/) do
+      STDOUT << "hello world"
+      STDERR << "failed hello"
+    end
+
+    assert_output(stderr: /failed/) do
+      STDOUT << "hello world"
+      STDERR << "failed hello"
+    end
+
+    assert_output(/hello/, /failed/) do
+      STDOUT << "hello world"
+      STDERR << "failed world"
+    end
+
+    assert_output("hello world", /failed/) do
+      STDOUT << "hello world"
+      STDERR << "failed world"
+    end
+
+    assert_output(/hello/, "failed world") do
+      STDOUT << "hello world"
+      STDERR << "failed world"
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output(/failed/) { STDOUT << "hello world" }
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output("hello") { STDOUT << "hello world" }
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output(stdout: "hello") { }
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output(stderr: "hello") { }
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output("world", "hello") do
+        STDOUT << "hello world"
+        STDERR << "world"
+      end
+    end
+
+    assert_raises(Minitest::Assertion) do
+      assert_output(/world/, /hello/) do
+        STDOUT << "hello world"
+        STDERR << "world"
+      end
+    end
+  end
+
+
   def test_skip
     ex = assert_raises(Minitest::Skip) { skip }
     assert_equal "", ex.message

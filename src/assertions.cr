@@ -1,4 +1,9 @@
+require "mutex"
 require "tempfile"
+
+lib LibC
+  fun dup(Int) : Int
+end
 
 class Exception
   getter file : String?
@@ -60,6 +65,7 @@ module Minitest
   # TODO: assert_silent / refute_silent
   module Assertions
     @@diff : Bool?
+    @@mutex = Mutex.new
 
     def self.diff?
       if (diff = @@diff).is_a?(Bool)
@@ -291,6 +297,66 @@ module Minitest
       else
         message = "Expected #{ T.name } but nothing was raised"
         raise Assertion.new(message, file: file, line: line)
+      end
+    end
+
+
+    def assert_silent(file = __FILE__, line = __LINE__)
+      assert_output("", "", file, line) do
+        yield
+      end
+    end
+
+    def assert_output(stdout = nil, stderr = nil, file = __FILE__, line = __LINE__)
+      output, error = capture_io do
+        yield
+      end
+
+      case stdout
+      when String then assert_equal stdout, output
+      when Regex then assert_match stdout, output
+      end
+
+      case stderr
+      when String then assert_equal stderr, error
+      when Regex then assert_match stderr, error
+      end
+    end
+
+    def capture_io
+      @@mutex.synchronize do
+        Tempfile.open("out") do |stdout|
+          Tempfile.open("err") do |stderr|
+            reopen(STDOUT, stdout) do
+              reopen(STDERR, stderr) do
+                yield
+              end
+            end
+            return {
+              stdout.rewind.gets_to_end,
+              stderr.rewind.gets_to_end,
+            }
+          ensure
+            stderr.delete
+          end
+        ensure
+          stdout.delete
+        end
+        raise "unreachable"
+      end
+    end
+
+    private def reopen(src, dst)
+      backup_fd = LibC.dup(src.fd)
+      raise Errno.new("dup") if backup_fd == -1
+
+      begin
+        src.reopen(dst)
+        yield
+        src.flush
+      ensure
+        LibC.dup2(backup_fd, src.fd)
+        LibC.close(backup_fd)
       end
     end
 
