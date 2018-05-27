@@ -2,6 +2,7 @@ require "../src/autorun"
 
 class ExpectationsTest < Minitest::Spec
   class Foo; end
+  class Bar; end
 
   let(:foo) { Foo.new }
 
@@ -70,6 +71,18 @@ class ExpectationsTest < Minitest::Spec
   it "wont_include" do
     [1, 2].wont_include(3)
     assert_raises(Minitest::Assertion) { [1, 2].wont_include(2) }
+  end
+
+  it "must_be_instance_of" do
+    foo = Foo.new
+    foo.must_be_instance_of(Foo)
+    assert_raises(Minitest::Assertion) { foo.must_be_instance_of(Bar) }
+  end
+
+  it "wont_be_instance_of" do
+    foo = Foo.new
+    foo.wont_be_instance_of(Bar)
+    assert_raises(Minitest::Assertion) { foo.wont_be_instance_of(Foo) }
   end
 
   it "must_match" do

@@ -51,6 +51,14 @@ module Minitest
       Expectation.new(self).wont_include(obj, message, file, line)
     end
 
+    def must_be_instance_of(obj, message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).must_be_instance_of(obj, message, file, line)
+    end
+
+    def wont_be_instance_of(obj, message = nil, file = __FILE__, line = __LINE__)
+      Expectation.new(self).wont_be_instance_of(obj, message, file, line)
+    end
+
     def must_match(pattern, message = nil, file = __FILE__, line = __LINE__)
       Expectation.new(self).must_match(pattern, message, file, line)
     end
@@ -128,6 +136,14 @@ module Minitest
 
     def wont_include(obj, message = nil, file = __FILE__, line = __LINE__)
       refute_includes(@target, obj, message, file, line)
+    end
+
+    def must_be_instance_of(obj, message = nil, file = __FILE__, line = __LINE__)
+      assert_instance_of(obj, @target, message, file, line)
+    end
+
+    def wont_be_instance_of(obj, message = nil, file = __FILE__, line = __LINE__)
+      refute_instance_of(obj, @target, message, file, line)
     end
 
     def must_match(pattern, message = nil, file = __FILE__, line = __LINE__)
