@@ -26,10 +26,7 @@ module Minitest
     include Assertions
 
     def run_one(name, proc)
-      case pattern = reporter.options.pattern
-      when Regex  then return unless name =~ pattern
-      when String then return unless name == pattern
-      end
+      return unless should_run?(name)
 
       result = Result.new(self.class.name, name)
 
