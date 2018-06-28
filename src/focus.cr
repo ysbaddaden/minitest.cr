@@ -21,11 +21,17 @@ module Minitest
     end
 
     def focused_test?(name)
-      {% begin %}
-      if focuses = FOCUSES[{{@type}}.name]?
-        focuses.empty? || focuses.includes?(name)
+      if FOCUSES.empty?
+        true
+      else
+        {% begin %}
+          if focuses = FOCUSES[{{@type}}.name]?
+            focuses.includes?(name)
+          else
+            false
+          end
+        {% end %}
       end
-      {% end %}
     end
   end
 end
