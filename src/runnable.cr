@@ -31,5 +31,17 @@ module Minitest
 
     def initialize(@reporter)
     end
+
+    def should_run?(name) : Bool
+      matches_pattern?(name)
+    end
+
+    def matches_pattern?(name)
+      case pattern = reporter.options.pattern
+      when Regex  then false unless name =~ pattern
+      when String then false unless name == pattern
+      end
+      true
+    end
   end
 end
