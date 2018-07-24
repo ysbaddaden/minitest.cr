@@ -165,6 +165,17 @@ class AssertionsTest < Minitest::Test
   end
 
 
+  def test_assert_responds_to
+    assert_responds_to Foo.new, :inspect
+    assert_raises(Minitest::Assertion) { assert_responds_to Foo.new, :foo }
+  end
+
+  def test_refute_responds_to
+    refute_responds_to Foo.new, :foo
+    assert_raises(Minitest::Assertion) { refute_responds_to Foo.new, :inspect }
+  end
+
+
   def test_assert_raises
     ex = assert_raises { raise "error message" }
     assert_equal "error message", ex.message
