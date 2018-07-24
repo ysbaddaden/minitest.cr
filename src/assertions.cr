@@ -265,13 +265,13 @@ module Minitest
 
 
     macro assert_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      %msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
-      assert {{ obj }}.responds_to?(:{{ method.id }}), %msg, file, line
+      %msg = -> { {{ message }} || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
+      assert {{ obj }}.responds_to?(:{{ method.id }}), %msg, {{ file }}, {{ line }}
     end
 
     macro refute_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      %msg = -> { message || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
-      refute {{ obj }}.responds_to?(:{{ method.id }}), %msg, file, line
+      %msg = -> { {{ message }} || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
+      refute {{ obj }}.responds_to?(:{{ method.id }}), %msg, {{ file }}, {{ line }}
     end
 
 
