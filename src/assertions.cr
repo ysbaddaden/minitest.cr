@@ -1,5 +1,19 @@
 require "mutex"
-require "tempfile"
+{% if compare_versions(Crystal::VERSION, "0.26.1") <= 0 && !Crystal::VERSION.starts_with?("0.26.1+") %}
+  require "tempfile"
+  private def tempfile(name)
+    Tempfile.open(name) do |f|
+      yield f
+    end
+  end
+{% else %}
+  private def tempfile(name)
+    File.tempfile(name).tap do |f|
+      yield f
+      f.close
+    end
+  end
+{% end %}
 
 lib LibC
   fun dup(Int) : Int
@@ -76,8 +90,8 @@ module Minitest
     end
 
     def diff(expected, actual)
-      a = Tempfile.open("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
-      b = Tempfile.open("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
+      a = tempfile("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
+      b = tempfile("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
 
       Process.run("diff", {"-u", a.path, b.path}) do |process|
         process.output.gets_to_end
@@ -325,8 +339,8 @@ module Minitest
 
     def capture_io
       @@mutex.synchronize do
-        Tempfile.open("out") do |stdout|
-          Tempfile.open("err") do |stderr|
+        tempfile("out") do |stdout|
+          tempfile("err") do |stderr|
             reopen(STDOUT, stdout) do
               reopen(STDERR, stderr) do
                 yield
