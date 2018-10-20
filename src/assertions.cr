@@ -61,8 +61,6 @@ module Minitest
     include LocationFilter
   end
 
-  # TODO: assert_output / refute_output
-  # TODO: assert_silent / refute_silent
   module Assertions
     @@diff : Bool?
     @@mutex = Mutex.new
