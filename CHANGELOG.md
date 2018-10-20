@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## v4.0.0
+## v0.4.1
+
+Fixes:
+- Compatibility with Crystal 0.27.0
+
+## v0.4.0
 
 Features:
 - Add `assert_instance_of`, `refute_instance_of` assertions;
