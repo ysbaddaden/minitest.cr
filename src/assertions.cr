@@ -1,5 +1,4 @@
 require "mutex"
-require "tempfile"
 
 lib LibC
   fun dup(Int) : Int
@@ -74,8 +73,8 @@ module Minitest
     end
 
     def diff(expected, actual)
-      a = Tempfile.open("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
-      b = Tempfile.open("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
+      a = File.tempfile("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
+      b = File.tempfile("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
 
       Process.run("diff", {"-u", a.path, b.path}) do |process|
         process.output.gets_to_end
@@ -323,8 +322,8 @@ module Minitest
 
     def capture_io
       @@mutex.synchronize do
-        Tempfile.open("out") do |stdout|
-          Tempfile.open("err") do |stderr|
+        File.tempfile("out") do |stdout|
+          File.tempfile("err") do |stderr|
             reopen(STDOUT, stdout) do
               reopen(STDERR, stderr) do
                 yield
