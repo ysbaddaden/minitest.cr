@@ -174,4 +174,9 @@ module Minitest
   def self.after_run(&block)
     after_run << block
   end
+
+  def self.exit(status = 1)
+    after_run.each(&.call)
+    exit status
+  end
 end
