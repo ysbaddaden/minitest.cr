@@ -1,8 +1,18 @@
 # CHANGELOG
 
-## v0.4.1
+## v0.4.2
 
 Fixes:
+- `--name` regression since `focus` was introduced.
+
+## v0.4.1
+
+Features:
+- Introduce `minitest/focus` to specify tests/specs to focus. Complements the
+  `--name` argument and is easier to use in specs.
+
+Fixes:
+- Local variable errors in `responds_to` assertions;
 - Compatibility with Crystal 0.27.0
 
 ## v0.4.0
