@@ -36,12 +36,15 @@ module Minitest
       matches_pattern?(name)
     end
 
-    def matches_pattern?(name)
+    def matches_pattern?(name) : Bool
       case pattern = reporter.options.pattern
-      when Regex  then false unless name =~ pattern
-      when String then false unless name == pattern
+      when Regex
+        !(name =~ pattern).nil?
+      when String
+        name == pattern
+      else
+        true
       end
-      true
     end
   end
 end
