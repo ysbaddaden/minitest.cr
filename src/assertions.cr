@@ -7,12 +7,9 @@ end
 class Exception
   getter file : String?
   getter line : Int32?
-  getter! backtrace : Array(String)
 
   def initialize(@message : String? = nil, @cause : Exception? = nil, @file = __FILE__, @line = __LINE__)
     # NOTE: hack to report the source location that raised
-    @backtrace = caller
-    @callstack = CallStack.new
   end
 
   def location
