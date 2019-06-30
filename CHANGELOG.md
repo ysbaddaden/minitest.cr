@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.4.3
+
+Fixes:
+- compatibility with recent Crystal releases (Exception initializer hack);
+
 ## v0.4.2
 
 Fixes:
