@@ -111,7 +111,7 @@ module Minitest
     puts options
 
     random = Random::PCG32.new(options.seed.to_u64)
-    channel = Channel::Buffered(Array(Runnable::Data) | Runnable::Data | Nil).new
+    channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.threads * 4)
     completed = Channel(Nil).new
 
     options.threads.times do
