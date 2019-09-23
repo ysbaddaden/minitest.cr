@@ -9,14 +9,14 @@ module Minitest
   class Options
     property chaos
     property verbose
-    property threads
+    property fibers
     getter pattern : String | Regex | Nil
     getter seed : UInt32
 
     def initialize
       @chaos = false
       @verbose = false
-      @threads = 1
+      @fibers = 1
       @seed = (ENV["SEED"]?.try(&.to_u32) || Random::Secure.rand(UInt32::MIN..UInt32::MAX)) & 0xFFFF
     end
 
@@ -44,9 +44,9 @@ module Minitest
         io << " --chaos"
       end
 
-      if threads = @threads
+      if fibers = @fibers
         io << " --parallel "
-        threads.to_s(io)
+        fibers.to_s(io)
       end
 
       if pattern = @pattern
@@ -79,8 +79,8 @@ module Minitest
         options.verbose = true
       end
 
-      opts.on("-p THREADS", "--parallel THREADS", "Parallelize runs.") do |threads|
-        options.threads = threads.to_i
+      opts.on("-p FIBERS", "--parallel FIBERS", "Parallelize runs.") do |fibers|
+        options.fibers = fibers.to_i
       end
 
       opts.on("-c", "--chaos", "Shuffle all tests from all test suites.") do
@@ -111,14 +111,13 @@ module Minitest
     puts options
 
     random = Random::PCG32.new(options.seed.to_u64)
-    channel = Channel::Buffered(Array(Runnable::Data) | Runnable::Data | Nil).new
+    channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.fibers * 4)
     completed = Channel(Nil).new
 
-    options.threads.times do
+    options.fibers.times do
       spawn do
         loop do
-          value = channel.receive
-          case value
+          case value = channel.receive?
           when Array
             value.each do |test|
               suite, name, proc = test
@@ -155,10 +154,8 @@ module Minitest
       end
     end
 
-    options.threads.times do
-      channel.send(nil)
-      completed.receive
-    end
+    channel.close
+    options.fibers.times { completed.receive }
 
     reporter.report
     reporter.passed?
