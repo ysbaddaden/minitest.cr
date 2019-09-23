@@ -5,6 +5,7 @@ module Minitest
     getter options : Options
 
     def initialize(@options)
+      @mutex = Mutex.new
     end
 
     def start
@@ -19,6 +20,14 @@ module Minitest
     def passed?
       true
     end
+
+    def pause
+      @mutex.lock
+    end
+
+    def resume
+      @mutex.unlock
+    end
   end
 
   class CompositeReporter < AbstractReporter
@@ -26,6 +35,7 @@ module Minitest
 
     def initialize(@options)
       @reporters = [] of AbstractReporter
+      super
     end
 
     def <<(reporter)
@@ -47,10 +57,20 @@ module Minitest
     def passed?
       reporters.all?(&.passed?)
     end
+
+    def pause
+      reporters.all?(&.pause)
+    end
+
+    def resume
+      reporters.all?(&.resume)
+    end
   end
 
   class ProgressReporter < AbstractReporter
     def record(result)
+      @mutex.lock
+
       if options.verbose
         if time = result.time
           print "%s#%s = %.3f s = " % {result.class_name, result.name, result.time.to_f}
@@ -70,6 +90,8 @@ module Minitest
     rescue ex
       puts ex
       puts ex.backtrace.join("\n")
+    ensure
+      @mutex.unlock
     end
   end
 
@@ -93,8 +115,13 @@ module Minitest
     end
 
     def record(result)
-      @count += 1
-      results << result if !result.passed? || result.skipped?
+      @mutex.synchronize do
+        @count += 1
+
+        if !result.passed? || result.skipped?
+          @mutex.synchronize { results << result }
+        end
+      end
     end
 
     def report

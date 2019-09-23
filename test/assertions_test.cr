@@ -220,12 +220,17 @@ class AssertionsTest < Minitest::Test
   end
 
   def test_assert_silent
+    @__reporter.pause
     assert_silent { }
     assert_raises(Minitest::Assertion) { assert_silent { STDOUT << "hello" } }
     assert_raises(Minitest::Assertion) { assert_silent { STDERR << "world" } }
+  ensure
+    @__reporter.resume
   end
 
   def test_assert_output
+    @__reporter.pause
+
     assert_output("hello", "world") do
       STDOUT << "hello"
       STDERR << "world"
@@ -295,6 +300,8 @@ class AssertionsTest < Minitest::Test
         STDERR << "world"
       end
     end
+  ensure
+    @__reporter.resume
   end
 
 

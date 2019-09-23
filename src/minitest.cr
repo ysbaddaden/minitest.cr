@@ -93,17 +93,11 @@ module Minitest
     end
   end
 
-  @@reporter : AbstractReporter?
-
-  def self.reporter
-    @@reporter ||= CompositeReporter.new(options).tap do |reporter|
+  class_property reporter : AbstractReporter do
+    CompositeReporter.new(options).tap do |reporter|
       reporter << SummaryReporter.new(options)
       reporter << ProgressReporter.new(options)
     end
-  end
-
-  def self.reporter=(reporter)
-    @@reporter = reporter
   end
 
   def self.run(args = nil)
@@ -113,6 +107,9 @@ module Minitest
     random = Random::PCG32.new(options.seed.to_u64)
     channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.fibers * 4)
     completed = Channel(Nil).new
+
+    # makes sure that reporter is initialized before spawning worker fibers:
+    raise "BUG: no minitest reporter" unless self.reporter
 
     options.fibers.times do
       spawn do

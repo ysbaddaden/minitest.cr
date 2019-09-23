@@ -27,9 +27,9 @@ module Minitest
       tests
     end
 
-    getter reporter : AbstractReporter
+    getter __reporter : AbstractReporter
 
-    def initialize(@reporter)
+    def initialize(@__reporter)
     end
 
     def should_run?(name) : Bool
@@ -37,7 +37,7 @@ module Minitest
     end
 
     def matches_pattern?(name) : Bool
-      case pattern = reporter.options.pattern
+      case pattern = __reporter.options.pattern
       when Regex
         !(name =~ pattern).nil?
       when String

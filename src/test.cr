@@ -43,7 +43,7 @@ module Minitest
         capture_exception(result) { after_teardown }
       end
 
-      reporter.record(result)
+      __reporter.record(result)
     end
 
     def capture_exception(result)
