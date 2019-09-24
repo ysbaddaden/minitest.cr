@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.5.0
+
+Requires:
+- Crystal >= 0.31.0 (Channel changes)
+
+Fixes:
+- MT compatibility
+
 ## v0.4.3
 
 Fixes:
