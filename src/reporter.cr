@@ -119,7 +119,7 @@ module Minitest
         @count += 1
 
         if !result.passed? || result.skipped?
-          @mutex.synchronize { results << result }
+          results << result
         end
       end
     end

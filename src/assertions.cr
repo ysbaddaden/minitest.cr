@@ -318,26 +318,30 @@ module Minitest
     end
 
     def capture_io
-      @@mutex.synchronize do
-        File.tempfile("out") do |stdout|
-          File.tempfile("err") do |stderr|
-            reopen(STDOUT, stdout) do
-              reopen(STDERR, stderr) do
-                yield
-              end
+      # prevents a reporter from printing any output from another thread,
+      # also prevents parallel calls to `capture_io`:
+      @__reporter.pause
+
+      File.tempfile("out") do |stdout|
+        File.tempfile("err") do |stderr|
+          reopen(STDOUT, stdout) do
+            reopen(STDERR, stderr) do
+              yield
             end
-            return {
-              stdout.rewind.gets_to_end,
-              stderr.rewind.gets_to_end,
-            }
-          ensure
-            stderr.delete
           end
+          return {
+            stdout.rewind.gets_to_end,
+            stderr.rewind.gets_to_end,
+          }
         ensure
-          stdout.delete
+          stderr.delete
         end
-        raise "unreachable"
+      ensure
+        stdout.delete
       end
+      raise "unreachable"
+    ensure
+      @__reporter.resume
     end
 
     private def reopen(src, dst)
