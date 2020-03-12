@@ -5,22 +5,22 @@ lib LibC
 end
 
 class Exception
-  getter file : String?
-  getter line : Int32?
+  getter __minitest_file : String?
+  getter __minitest_line : Int32?
 
-  def initialize(@message : String? = nil, @cause : Exception? = nil, @file = __FILE__, @line = __LINE__)
+  def initialize(@message : String? = nil, @cause : Exception? = nil, @__minitest_file = __FILE__, @__minitest_line = __LINE__)
     # NOTE: hack to report the source location that raised
   end
 
-  def location
-    "#{file}:#{line}"
+  def __minitest_location
+    "#{__minitest_file}:#{__minitest_line}"
   end
 end
 
 module Minitest
   module LocationFilter
-    def file
-      file, cwd = @file.to_s, Dir.current
+    def __minitest_file
+      file, cwd = @__minitest_file.to_s, Dir.current
       file.starts_with?(cwd) ? file[(cwd.size + 1) .. -1] : file
     end
   end
@@ -33,7 +33,7 @@ module Minitest
 
     def initialize(@exception)
       super "#{exception.class.name}: #{exception.message}"
-      @file = exception.file
+      @__minitest_file = exception.__minitest_file
     end
 
     def backtrace
@@ -44,8 +44,8 @@ module Minitest
       end
     end
 
-    def location
-      "#{file}:#{exception.line}"
+    def __minitest_location
+      "#{__minitest_file}:#{exception.__minitest_line}"
     end
   end
 
@@ -88,11 +88,11 @@ module Minitest
       return true if actual
 
       if message
-        raise Minitest::Assertion.new(message, file: file, line: line) if message.is_a?(String)
-        raise Minitest::Assertion.new(message.call, file: file, line: line)
+        raise Minitest::Assertion.new(message, __minitest_file: file, __minitest_line: line) if message.is_a?(String)
+        raise Minitest::Assertion.new(message.call, __minitest_file: file, __minitest_line: line)
       end
 
-      raise Minitest::Assertion.new("failed assertion", file: file, line: line)
+      raise Minitest::Assertion.new("failed assertion", __minitest_file: file, __minitest_line: line)
     end
 
     def assert(message = nil, file = __FILE__, line = __LINE__)
@@ -276,7 +276,7 @@ module Minitest
         ex
       else
         message ||= "Expected an exception but nothing was raised"
-        raise Assertion.new(message, file: file, line: line)
+        raise Assertion.new(message, __minitest_file: file, __minitest_line: line)
       end
     end
 
@@ -287,10 +287,10 @@ module Minitest
         ex
       rescue ex
         message = "Expected #{ T.name } but #{ ex.class.name } was raised"
-        raise Assertion.new(message, file: file, line: line)
+        raise Assertion.new(message, __minitest_file: file, __minitest_line: line)
       else
         message = "Expected #{ T.name } but nothing was raised"
-        raise Assertion.new(message, file: file, line: line)
+        raise Assertion.new(message, __minitest_file: file, __minitest_line: line)
       end
     end
 
@@ -345,26 +345,29 @@ module Minitest
     end
 
     private def reopen(src, dst)
-      backup_fd = LibC.dup(src.fd)
-      raise Errno.new("dup") if backup_fd == -1
+      if (backup_fd = LibC.dup(src.fd)) == -1
+        raise IO::Error.from_errno("dup")
+      end
 
       begin
         src.reopen(dst)
         yield
         src.flush
       ensure
-        LibC.dup2(backup_fd, src.fd)
+        if LibC.dup2(backup_fd, src.fd) == -1
+          raise IO::Error.from_errno("dup")
+        end
         LibC.close(backup_fd)
       end
     end
 
 
     def skip(message = "", file = __FILE__, line = __LINE__)
-      raise Minitest::Skip.new(message.to_s, file: file, line: line)
+      raise Minitest::Skip.new(message.to_s, __minitest_file: file, __minitest_line: line)
     end
 
     def flunk(message = "Epic Fail!", file = __FILE__, line = __LINE__)
-      raise Minitest::Assertion.new(message.to_s, file: file, line: line)
+      raise Minitest::Assertion.new(message.to_s, __minitest_file: file, __minitest_line: line)
     end
 
 
