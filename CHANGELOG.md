@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.5.1
+
+Requires:
+- Crystal >= 0.34.0 (Errno changes)
+
 ## v0.5.0
 
 Requires:
