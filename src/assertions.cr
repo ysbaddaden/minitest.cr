@@ -309,11 +309,13 @@ module Minitest
       case stdout
       when String then assert_equal stdout, output
       when Regex then assert_match stdout, output
+      when Nil # skip
       end
 
       case stderr
       when String then assert_equal stderr, error
       when Regex then assert_match stderr, error
+      when Nil # skip
       end
     end
 
