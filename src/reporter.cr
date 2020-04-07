@@ -161,6 +161,8 @@ module Minitest
           when Skip
             puts "  #{i + 1}) Skipped:".colorize(:yellow)
             puts "#{loc} [#{exception.__minitest_location}]:\n#{exception.message}"
+          else
+            # shut up, crystal (you're wrong)
           end
           puts
         end
