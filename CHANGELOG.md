@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.0.0
+
+Identical to v0.5.1. A mere v1 stable release of Minitest for Crystal v1.
+
 ## v0.5.1
 
 Requires:
