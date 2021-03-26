@@ -1,8 +1,10 @@
 .POSIX:
 
 CRYSTAL = crystal
+CRFLAGS =
+TEST_ARGS = --chaos --parallel 4 --verbose
 
 test: .phony
-	$(CRYSTAL) run test/*_test.cr -- --chaos --parallel 4 --verbose
+	$(CRYSTAL) run $(CRFLAGS) test/*_test.cr -- $(TEST_ARGS)
 
 .phony:
