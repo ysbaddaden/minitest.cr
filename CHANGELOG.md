@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Unreleased
+
+Fixes:
+- Compatibility with Crystal interpreter.
+- Runnables aren't shuffled in non chaos mode.
+
+Features:
+- Add `message` helper to wrap custom messages for custom assertions on top of
+  existing assertions (missing feature from original Ruby Minitest).
+- Implements a diff algorithm to remove a dependency on `diff` external tools.
+
 ## v1.0.0
 
 Identical to v0.5.1. A mere v1 stable release of Minitest for Crystal v1.
