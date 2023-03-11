@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.1.0
 
 Fixes:
 - Compatibility with Crystal interpreter.
