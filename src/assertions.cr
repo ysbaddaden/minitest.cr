@@ -87,15 +87,20 @@ module Minitest
     def assert(actual, message = nil, file = __FILE__, line = __LINE__)
       return true if actual
 
-      if message
-        raise Minitest::Assertion.new(message, __minitest_file: file, __minitest_line: line) if message.is_a?(String)
-        raise Minitest::Assertion.new(message.call, __minitest_file: file, __minitest_line: line)
-      end
+      msg =
+        case message
+        when String
+          message
+        when Proc
+          message.call
+        else
+          "failed assertion"
+        end
 
-      raise Minitest::Assertion.new("failed assertion", __minitest_file: file, __minitest_line: line)
+      raise Minitest::Assertion.new(msg, __minitest_file: file, __minitest_line: line)
     end
 
-    def assert(message = nil, file = __FILE__, line = __LINE__)
+    def assert(message = nil, file = __FILE__, line = __LINE__, &)
       assert yield, message, file, line
     end
 
@@ -103,13 +108,13 @@ module Minitest
       assert !actual, message || "failed refutation", file, line
     end
 
-    def refute(message = nil, file = __FILE__, line = __LINE__)
+    def refute(message = nil, file = __FILE__, line = __LINE__, &)
       refute yield, message, file, line
     end
 
 
     def assert_equal(expected, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> {
+      msg = self.message(message) do
         if need_diff?(expected, actual)
           result = diff(expected, actual)
           if result.empty?
@@ -118,22 +123,21 @@ module Minitest
             result
           end
         else
-          message || "Expected #{expected.inspect} but got #{actual.inspect}"
+          "Expected #{expected.inspect} but got #{actual.inspect}"
         end
-      }
+      end
       assert expected == actual, msg, file, line
     end
 
     def refute_equal(expected, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{expected.inspect} to not be equal to #{actual.inspect}" }
+      msg = self.message(message) { "Expected #{expected.inspect} to not be equal to #{actual.inspect}" }
       assert expected != actual, msg, file, line
     end
 
 
     def assert_same(expected, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> {
-        message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
-        "to be the same as #{expected.inspect} (oid=#{expected.object_id})"
+      msg = self.message(message) {
+        "Expected #{actual.inspect} (oid=#{actual.object_id}) to be the same as #{expected.inspect} (oid=#{expected.object_id})"
       }
       if expected.responds_to?(:same?)
         assert expected.same?(actual), msg, file, line
@@ -143,9 +147,8 @@ module Minitest
     end
 
     def refute_same(expected, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> {
-        message || "Expected #{actual.inspect} (oid=#{actual.object_id}) " +
-        "to not be the same as #{expected.inspect} (oid=#{expected.object_id})"
+      msg = self.message(message) {
+        "Expected #{actual.inspect} (oid=#{actual.object_id}) to not be the same as #{expected.inspect} (oid=#{expected.object_id})"
       }
       if expected.responds_to?(:same?)
         refute expected.same?(actual), msg, file, line
@@ -156,29 +159,29 @@ module Minitest
 
 
     def assert_match(pattern : Regex, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{pattern.inspect} to match: #{actual.inspect}" }
+      msg = self.message(message) { "Expected #{pattern.inspect} to match: #{actual.inspect}" }
       assert actual =~ pattern, msg, file, line
     end
 
     def assert_match(pattern, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{pattern.inspect} to match #{actual.inspect}" }
+      msg = self.message(message) { "Expected #{pattern.inspect} to match #{actual.inspect}" }
       assert actual =~ Regex.new(Regex.escape(pattern.to_s)), msg, file, line
     end
 
     def refute_match(pattern : Regex, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{pattern.inspect} to not match #{actual.inspect}" }
+      msg = self.message(message) { "Expected #{pattern.inspect} to not match #{actual.inspect}" }
       refute actual =~ pattern, msg, file, line
     end
 
     def refute_match(pattern, actual, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{pattern.inspect} to not match #{actual.inspect}" }
+      msg = self.message(message) { "Expected #{pattern.inspect} to not match #{actual.inspect}" }
       refute actual =~ Regex.new(Regex.escape(pattern.to_s)), msg, file, line
     end
 
 
     def assert_empty(actual, message = nil, file = __FILE__, line = __LINE__)
       if actual.responds_to?(:empty?)
-        msg = -> { message || "Expected #{actual.inspect} to be empty" }
+        msg = self.message(message) { "Expected #{actual.inspect} to be empty" }
         assert actual.empty?, msg, file, line
       else
         assert_responds_to actual, :empty?
@@ -187,7 +190,7 @@ module Minitest
 
     def refute_empty(actual, message = nil, file = __FILE__, line = __LINE__)
       if actual.responds_to?(:empty?)
-        msg = -> { message || "Expected #{actual.inspect} to not be empty" }
+        msg = self.message(message) { "Expected #{actual.inspect} to not be empty" }
         refute actual.empty?, msg, file, line
       else
         assert_responds_to actual, :empty?
@@ -206,13 +209,13 @@ module Minitest
 
     def assert_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       n = (expected.to_f - actual.to_f).abs
-      msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to be <= #{delta}" }
+      msg = self.message(message) { "Expected #{expected} - #{actual} (#{n}) to be <= #{delta}" }
       assert delta >= n, msg, file, line
     end
 
     def refute_in_delta(expected, actual, delta = 0.001, message = nil, file = __FILE__, line = __LINE__)
       n = (expected.to_f - actual.to_f).abs
-      msg = -> { message || "Expected #{expected} - #{actual} (#{n}) to not be <= #{delta}" }
+      msg = self.message(message) { "Expected #{expected} - #{actual} (#{n}) to not be <= #{delta}" }
       refute delta >= n, msg, file, line
     end
 
@@ -229,7 +232,7 @@ module Minitest
 
 
     def assert_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{collection.inspect} to include #{obj.inspect}" }
+      msg = self.message(message) { "Expected #{collection.inspect} to include #{obj.inspect}" }
       if collection.responds_to?(:includes?)
         assert collection.includes?(obj), msg, file, line
       else
@@ -238,7 +241,7 @@ module Minitest
     end
 
     def refute_includes(collection, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{collection.inspect} to not include #{obj.inspect}" }
+      msg = self.message(message) { "Expected #{collection.inspect} to not include #{obj.inspect}" }
       if collection.responds_to?(:includes?)
         refute collection.includes?(obj), msg, file, line
       else
@@ -248,23 +251,31 @@ module Minitest
 
 
     def assert_instance_of(cls, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{obj.inspect} to be an instance of #{cls.name}, not #{obj.class.name}" }
+      msg = self.message(message) do
+        "Expected #{obj.inspect} to be an instance of #{cls.name}, not #{obj.class.name}"
+      end
       assert cls === obj, msg, file, line
     end
 
     def refute_instance_of(cls, obj, message = nil, file = __FILE__, line = __LINE__)
-      msg = -> { message || "Expected #{obj.inspect} to not be an instance of #{cls.name}" }
+      msg = self.message(message) do
+        "Expected #{obj.inspect} to not be an instance of #{cls.name}"
+      end
       refute cls === obj, msg, file, line
     end
 
 
     macro assert_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      %msg = -> { {{ message }} || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }" }
+      %msg = self.message({{ message }}) do
+        "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to respond to ##{ {{ method }} }"
+      end
       assert {{ obj }}.responds_to?(:{{ method.id }}), %msg, {{ file }}, {{ line }}
     end
 
     macro refute_responds_to(obj, method, message = nil, file = __FILE__, line = __LINE__)
-      %msg = -> { {{ message }} || "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }" }
+      %msg = self.message({{ message }}) do
+        "Expected #{ {{ obj }}.inspect} (#{ {{ obj }}.class.name}) to not respond to ##{ {{ method }} }"
+      end
       refute {{ obj }}.responds_to?(:{{ method.id }}), %msg, {{ file }}, {{ line }}
     end
 
@@ -370,6 +381,20 @@ module Minitest
 
     def flunk(message = "Epic Fail!", file = __FILE__, line = __LINE__)
       raise Minitest::Assertion.new(message.to_s, __minitest_file: file, __minitest_line: line)
+    end
+
+    def message(message : Nil, &block : -> String) : -> String
+      block
+    end
+    def message(message : String, &block : -> String) : -> String
+      if message.blank?
+        block
+      else
+        -> { "#{message}\n#{block.call}" }
+      end
+    end
+    def message(message : Proc(String), &block : -> String) : -> String
+      -> { "#{message.call}\n#{block.call}" }
     end
 
 
