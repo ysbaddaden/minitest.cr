@@ -35,59 +35,55 @@ class AssertionsTest < Minitest::Test
     assert_equal %(Expected "this is correct" but got "this is wrong"), ex.message
   end
 
-  {% unless flag?(:interpreted) %}
-    def test_assert_equal_diffs_long_strings
-      correct = <<-PLAIN
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-      consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-      non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      PLAIN
+  def test_assert_equal_diffs_long_strings
+    correct = <<-PLAIN
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    PLAIN
 
-      wrong = <<-PLAIN
-      Lorem pisum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore manga aliqua. Ut enim ad minim veniam,
-      quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-      consequat. Duis aute irure dolor ni reprehenderit in voluptate velit esse
-      cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-      non proident, sunt ni culpa qui officia deserunt mollit anim id tse laborum.
-      PLAIN
+    wrong = <<-PLAIN
+    Lorem pisum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore manga aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor ni reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt ni culpa qui officia deserunt mollit anim id tse laborum.
+    PLAIN
 
-      ex = assert_raises(Minitest::Assertion) { assert_equal correct, wrong }
-      assert_equal <<-PLAIN, ex.message
-      --- expected
-      +++ actual
-      @@ -1,6 +1,6 @@
-      -Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      -tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-      +Lorem pisum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      +tempor incididunt ut labore et dolore manga aliqua. Ut enim ad minim veniam,
-       quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-      -consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-      +consequat. Duis aute irure dolor ni reprehenderit in voluptate velit esse
-       cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-      -non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      +non proident, sunt ni culpa qui officia deserunt mollit anim id tse laborum.
-      PLAIN
-    end
+    ex = assert_raises(Minitest::Assertion) { assert_equal correct, wrong }
+    assert <<-PLAIN == ex.message
+    --- expected
+    +++ actual
+    -Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    -tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    +Lorem pisum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    +tempor incididunt ut labore et dolore manga aliqua. Ut enim ad minim veniam,
+     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    -consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    +consequat. Duis aute irure dolor ni reprehenderit in voluptate velit esse
+     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    -non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    +non proident, sunt ni culpa qui officia deserunt mollit anim id tse laborum.
+    PLAIN
+  end
 
-    def test_assert_equal_diffs_pretty_printed_objects
-      a = { code: 1, message: "some long message to force a line break in pretty inspect", status: "failed" }
-      b = { code: 3, message: "some long message to force a line break in pretty inspect", status: "failed" }
-      ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
-      assert_equal <<-PLAIN, ex.message
-      --- expected
-      +++ actual
-      @@ -1,3 +1,3 @@
-      -{code: 1,
-      +{code: 3,
-        message: "some long message to force a line break in pretty inspect",
-        status: "failed"}
-      PLAIN
-    end
-  {% end %}
+  def test_assert_equal_diffs_pretty_printed_objects
+    a = { code: 1, message: "some long message to force a line break in pretty inspect", status: "failed" }
+    b = { code: 3, message: "some long message to force a line break in pretty inspect", status: "failed" }
+    ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
+    assert <<-PLAIN == ex.message
+    --- expected
+    +++ actual
+    -{code: 1,
+    +{code: 3,
+      message: "some long message to force a line break in pretty inspect",
+      status: "failed"}
+    PLAIN
+  end
 
   def test_refute_equal
     refute_equal 1, 2

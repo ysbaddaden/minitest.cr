@@ -1,4 +1,5 @@
 require "mutex"
+require "./diff"
 
 lib LibC
   fun dup(Int) : Int
@@ -58,38 +59,32 @@ module Minitest
   end
 
   module Assertions
-    @@diff : Bool?
     @@mutex = Mutex.new
 
-    def self.diff?
-      {% if flag?(:interpreted) %}
-        # NOTE: the crystal interpreter doesn't support Process#wait and the
-        #       current VM (as of Crystal 1.7) waits forever for the SIGCHLD
-        #       signal that will never come (received by the crystal binary but
-        #       not forwarded to the VM).
-        false
-      {% else %}
-        if (diff = @@diff).is_a?(Bool)
-          diff
-        else
-          @@diff = Process.new("diff", [__FILE__, __FILE__]).wait.success?
-        end
-      {% end %}
-    end
-
     def diff(expected : String, actual : String)
-      a = File.tempfile("a") { |f| f << expected << '\n' }
-      b = File.tempfile("b") { |f| f << actual.gsub("\\n", '\n') << '\n' }
+      diff = Diff.line_diff(expected, actual)
 
-      Process.run("diff", {"-u", a.path, b.path}) do |process|
-        process.output.gets_to_end
-          .sub(/^--- [^\n]*/m, "--- expected")
-          .sub(/^\+\+\+ [^\n]*/m, "+++ actual")
-          .strip
-      end
-    ensure
-      if a; a.delete; end
-      if b; b.delete; end
+      String.build do |str|
+        str << "--- expected\n"
+        str << "+++ actual\n"
+
+        diff.each do |delta|
+          case delta.type
+          when .unchanged?
+            delta.a.each do |i|
+              str << ' ' << diff.a[i] << '\n'
+            end
+          when .appended?
+            delta.b.each do |i|
+              str << '+' << diff.b[i] << '\n'
+            end
+          when .deleted?
+            delta.a.each do |i|
+              str << '-' << diff.a[i] << '\n'
+            end
+          end
+        end
+      end.chomp
     end
 
     def diff(expected, actual)
@@ -413,9 +408,8 @@ module Minitest
 
 
     private def need_diff?(expected, actual)
-      Minitest::Assertions.diff? &&
-        need_diff?(expected.inspect) &&
-        need_diff?(actual.inspect)
+      need_diff?(expected.inspect) &&
+      need_diff?(actual.inspect)
     end
 
     private def need_diff?(obj : String)
