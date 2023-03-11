@@ -318,12 +318,9 @@ class AssertionsTest < Minitest::Test
     assert_equal "broken", ex.message
   end
 
-  def test_skipped
-    skip "testing that this test is skipped"
-    raise "should never be raised"
+  def test_message
+    assert_equal "default", (message(nil) { "default" }).call
+    assert_equal "string\ndefault", (message("string") { "default" }).call
+    assert_equal "proc:string\ndefault", (message(-> { "proc:string" }) { "default" }).call
   end
-
-  # def test_flunked
-  #   flunk
-  # end
 end
