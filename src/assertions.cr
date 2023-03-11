@@ -62,16 +62,24 @@ module Minitest
     @@mutex = Mutex.new
 
     def self.diff?
-      if (diff = @@diff).is_a?(Bool)
-        diff
-      else
-        @@diff = Process.new("diff").wait.success?
-      end
+      {% if flag?(:interpreted) %}
+        # NOTE: the crystal interpreter doesn't support Process#wait and the
+        #       current VM (as of Crystal 1.7) waits forever for the SIGCHLD
+        #       signal that will never come (received by the crystal binary but
+        #       not forwarded to the VM).
+        false
+      {% else %}
+        if (diff = @@diff).is_a?(Bool)
+          diff
+        else
+          @@diff = Process.new("diff", [__FILE__, __FILE__]).wait.success?
+        end
+      {% end %}
     end
 
-    def diff(expected, actual)
-      a = File.tempfile("a") { |f| f << expected.inspect.gsub("\\n", '\n') << '\n' }
-      b = File.tempfile("b") { |f| f << actual.inspect.gsub("\\n", '\n') << '\n' }
+    def diff(expected : String, actual : String)
+      a = File.tempfile("a") { |f| f << expected << '\n' }
+      b = File.tempfile("b") { |f| f << actual.gsub("\\n", '\n') << '\n' }
 
       Process.run("diff", {"-u", a.path, b.path}) do |process|
         process.output.gets_to_end
@@ -82,6 +90,12 @@ module Minitest
     ensure
       if a; a.delete; end
       if b; b.delete; end
+    end
+
+    def diff(expected, actual)
+      left = expected.pretty_inspect.gsub("\\n", '\n') unless expected.is_a?(String)
+      right = actual.pretty_inspect.gsub("\\n", '\n') unless actual.is_a?(String)
+      diff(left, right)
     end
 
     def assert(actual, message = nil, file = __FILE__, line = __LINE__)
@@ -399,12 +413,13 @@ module Minitest
 
 
     private def need_diff?(expected, actual)
-      return false unless expected.is_a?(String)
-      return false unless actual.is_a?(String)
+      Minitest::Assertions.diff? &&
+        need_diff?(expected.inspect) &&
+        need_diff?(actual.inspect)
+    end
 
-      return Minitest::Assertions.diff? ||
-        expected.index('\n') || actual.index('\n') ||
-        expected.size > 30 || actual.size > 30
+    private def need_diff?(obj : String)
+      !!obj.index("") && obj.size > 30
     end
   end
 end

@@ -4,74 +4,80 @@ class RunnableTest < Minitest::Test
   BINARY_PATH = File.expand_path("runnable_#{Random::Secure.hex(3)}_test", __DIR__)
   SOURCE_PATH = BINARY_PATH + ".cr"
 
-  begin
-    File.write(SOURCE_PATH, <<-CRYSTAL)
-    require "../src/autorun"
+  {% if flag?(:interpreted) %}
+    def setup
+      skip "Process doesn't work in the Crystal interpreter (the VM waits forever for SIGCHLD)"
+    end
+  {% else %}
+    begin
+      File.write(SOURCE_PATH, <<-CRYSTAL)
+      require "../src/autorun"
 
-    class ABCTest < Minitest::Test
-      def test_success
-        assert true
+      class ABCTest < Minitest::Test
+        def test_success
+          assert true
+        end
+
+        def test_another_success
+          refute false
+        end
+
+        def test_error
+          raise "oopsie"
+        end
+
+        def test_skip
+          skip
+        end
+
+        def test_skip_message
+          skip "it doesn't work"
+        end
+
+        def test_skip_symbol
+          skip :not_implemented
+        end
+
+        def test_flunk
+          flunk
+        end
+
+        def test_flunk_message
+          flunk "it crashes randomly"
+        end
+
+        def test_flunk_symbol
+          flunk :todo
+        end
       end
 
-      def test_another_success
-        refute false
-      end
+      describe "ABC" do
+        it "success" do
+          assert true
+        end
 
-      def test_error
-        raise "oopsie"
+        it "fails" do
+          refute true
+        end
       end
+      CRYSTAL
 
-      def test_skip
-        skip
-      end
+      crystal = ENV.fetch("CRYSTAL", "crystal")
+      args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
+      stderr = IO::Memory.new
 
-      def test_skip_message
-        skip "it doesn't work"
-      end
-
-      def test_skip_symbol
-        skip :not_implemented
-      end
-
-      def test_flunk
-        flunk
-      end
-
-      def test_flunk_message
-        flunk "it crashes randomly"
-      end
-
-      def test_flunk_symbol
-        flunk :todo
+      unless Process.run(crystal, args).success?
+        STDERR.puts "Failed to build runnable test:"
+        STDERR.puts stderr.rewind.to_s
+        Minitest.exit(1)
       end
     end
 
-    describe "ABC" do
-      it "success" do
-        assert true
-      end
-
-      it "fails" do
-        refute true
-      end
+    Minitest.after_run do
+      File.delete(BINARY_PATH) if File.exists?(BINARY_PATH)
+      File.delete(SOURCE_PATH) if File.exists?(SOURCE_PATH)
     end
-    CRYSTAL
-
-    crystal = ENV.fetch("CRYSTAL", "crystal")
-    args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
-    stderr = IO::Memory.new
-
-    unless Process.run(crystal, args).success?
-      STDERR.puts "Failed to build runnable test:"
-      STDERR.puts stderr.rewind.to_s
-      Minitest.exit(1)
-    end
-  end
-
-  Minitest.after_run do
-    File.delete(BINARY_PATH) if File.exists?(BINARY_PATH)
-    File.delete(SOURCE_PATH) if File.exists?(SOURCE_PATH)
-  end
+  {% end %}
 
   def test_runs_all_tests
     stdout = execute("--verbose", pass: false)
