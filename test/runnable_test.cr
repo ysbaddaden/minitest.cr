@@ -138,7 +138,7 @@ class RunnableTest < Minitest::Test
     refute_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
     refute_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
     assert_match /ABC#test_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABC#test_fails = [\d.]+ s = \e\[41m\F/, stdout
+    refute_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
     assert_match "2 tests, 0 failures, 0 errors, 0 skips", stdout
   end
 
@@ -150,7 +150,7 @@ class RunnableTest < Minitest::Test
     refute_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
     refute_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
     assert_match /ABC#test_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABC#test_fails = [\d.]+ s = \e\[41m\F/, stdout
+    refute_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
     assert_match "3 tests, 0 failures, 0 errors, 0 skips", stdout
   end
 
