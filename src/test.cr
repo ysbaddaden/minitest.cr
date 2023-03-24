@@ -25,7 +25,7 @@ module Minitest
     include LifecycleHooks
     include Assertions
 
-    def run_one(name, proc)
+    def run_one(name : String, proc : Test ->) : Nil
       return unless should_run?(name)
 
       result = Result.new(self.class.name, name)
@@ -46,18 +46,18 @@ module Minitest
       __reporter.record(result)
     end
 
-    def capture_exception(result)
-      begin
-        yield
-      rescue ex : Assertion | Skip
-        result.failures << ex
-      rescue ex : Exception
-        result.failures << UnexpectedError.new(ex)
-      end
+    def capture_exception(result : Result, &) : Nil
+      yield
+    rescue ex : Assertion | Skip
+      result.failures << ex
+    rescue ex : Exception
+      result.failures << UnexpectedError.new(ex)
     end
 
-    def self.failures
-      @@failures ||= [] of Assertion | Skip | UnexpectedError
+    @@failures = [] of Assertion | Skip | UnexpectedError
+
+    def self.failures : Array(Assertion, Skip, UnexpectedError)
+      @@failures
     end
   end
 end

@@ -9,24 +9,24 @@ module Minitest
       @mutex = Mutex.new
     end
 
-    def start
+    def start : Nil
     end
 
-    def record(result)
+    def record(result : Result) : Nil
     end
 
-    def report
+    def report : Nil
     end
 
-    def passed?
+    def passed? : Bool
       true
     end
 
-    def pause
+    def pause : Nil
       @mutex.lock
     end
 
-    def resume
+    def resume : Nil
       @mutex.unlock
     end
   end
@@ -39,42 +39,42 @@ module Minitest
       super
     end
 
-    def <<(reporter)
+    def <<(reporter : AbstractReporter)
       reporters << reporter
     end
 
-    def start
+    def start : Nil
       reporters.each(&.start)
     end
 
-    def record(result)
+    def record(result : Result) : Nil
       reporters.each(&.record(result))
     end
 
-    def report
+    def report : Nil
       reporters.each(&.report)
     end
 
-    def passed?
+    def passed? : Bool
       reporters.all?(&.passed?)
     end
 
-    def pause
-      reporters.all?(&.pause)
+    def pause : Nil
+      reporters.each(&.pause)
     end
 
-    def resume
-      reporters.all?(&.resume)
+    def resume : Nil
+      reporters.each(&.resume)
     end
   end
 
   class ProgressReporter < AbstractReporter
-    def record(result)
+    def record(result : Result) : Nil
       @mutex.lock
 
       if options.verbose
         if time = result.time
-          print "%s#%s = %.3f s = " % {result.class_name, result.name, result.time.to_f}
+          print "%s#%s = %.3f s = " % {result.class_name, result.name, time.to_f}
         else
           print "%s#%s = ? = " % {result.class_name, result.name}
         end
@@ -111,11 +111,11 @@ module Minitest
       @total_time = uninitialized Time::Span # avoid nilable
     end
 
-    def start
+    def start : Nil
       @start_time = Time.monotonic
     end
 
-    def record(result)
+    def record(result) : Nil
       @mutex.synchronize do
         @count += 1
 
@@ -125,20 +125,20 @@ module Minitest
       end
     end
 
-    def report
+    def report : Nil
       @total_time = Time.monotonic - start_time
       @failures = results.count(&.failure.is_a?(Assertion))
       @errors = results.count(&.failure.is_a?(UnexpectedError))
       @skips = results.count(&.failure.is_a?(Skip))
     end
 
-    def passed?
+    def passed? : Bool
       results.all?(&.skipped?)
     end
   end
 
   class SummaryReporter < StatisticsReporter
-    def report
+    def report : Nil
       super
 
       puts unless options.verbose

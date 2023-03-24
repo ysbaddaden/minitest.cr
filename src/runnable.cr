@@ -32,11 +32,11 @@ module Minitest
     def initialize(@__reporter)
     end
 
-    def should_run?(name) : Bool
+    def should_run?(name : String) : Bool
       matches_pattern?(name)
     end
 
-    def matches_pattern?(name) : Bool
+    def matches_pattern?(name : String) : Bool
       case pattern = __reporter.options.pattern
       when Regex
         !(name =~ pattern).nil?

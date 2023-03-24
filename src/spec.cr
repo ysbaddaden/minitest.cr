@@ -30,7 +30,7 @@ module Minitest
           .join("::")
       %}
       class {{ class_name.id }}Spec < {{ @type }}
-        def self.name
+        def self.name : String
           "#{ {{ @type }}.name }::{{ name.id }}"
         end
 
@@ -44,7 +44,7 @@ module Minitest
       end
     end
 
-    def expect(value)
+    def expect(value) : Expectation
       Expectation.new(value)
     end
   end
@@ -59,7 +59,7 @@ macro describe(name, &block)
       .join("::")
   %}
   class {{ class_name.id }}Spec < Minitest::Spec
-    def self.name
+    def self.name : String
       {{ name.id.stringify }}
     end
 

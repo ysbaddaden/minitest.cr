@@ -76,7 +76,7 @@ class FocusTest < Minitest::Test
 
     rs = Process.run(BINARY_PATH, args, output: stdout, error: stderr)
     if pass
-      assert rs.success?, "expected run to pass, but it failed:\n#{stderr.rewind.to_s}"
+      assert rs.success?, "expected run to pass, but it failed:\n#{stderr.rewind}"
     else
       refute rs.success?, "expected run to fail, but it passed"
     end
