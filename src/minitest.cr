@@ -7,9 +7,9 @@ require "./spec"
 
 module Minitest
   class Options
-    property chaos
-    property verbose
-    property fibers
+    property chaos : Bool
+    property verbose : Bool
+    property fibers : Int32
     getter pattern : String | Regex | Nil
     getter seed : UInt32
 
@@ -17,10 +17,10 @@ module Minitest
       @chaos = false
       @verbose = false
       @fibers = 1
-      @seed = (ENV["SEED"]?.try(&.to_u32) || Random::Secure.rand(UInt32::MIN..UInt32::MAX)) & 0xFFFF
+      @seed = ENV["SEED"]?.try(&.to_u32) || Random.rand(0_u32..0xFFFF_u32)
     end
 
-    def pattern=(pattern)
+    def pattern=(pattern : String)
       if pattern =~ %r(\A/(.+?)/\Z)
         @pattern = Regex.new($1)
       else
@@ -28,11 +28,11 @@ module Minitest
       end
     end
 
-    def seed=(seed)
-      @seed = seed.to_u32 & 0xFFFF
+    def seed=(seed : String | UInt32)
+      @seed = seed.to_u32
     end
 
-    def to_s(io)
+    def to_s(io : IO) : Nil
       io << "Run options: --seed "
       seed.to_s(io)
 
@@ -58,11 +58,11 @@ module Minitest
     end
   end
 
-  def self.options
+  def self.options : Options
     @@options ||= Options.new
   end
 
-  def self.process_args(args)
+  def self.process_args(args : Enumerable(String)) : Nil
     OptionParser.parse(args) do |opts|
       opts.banner = "minitest options"
 
@@ -100,57 +100,19 @@ module Minitest
     end
   end
 
-  def self.run(args = nil)
+  def self.run(args = nil) : Bool
     process_args(args) if args
     puts options
 
-    random = Random::PCG32.new(options.seed.to_u64)
     channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.fibers * 4)
     completed = Channel(Nil).new
 
     # makes sure that reporter is initialized before spawning worker fibers:
     raise "BUG: no minitest reporter" unless self.reporter
 
-    options.fibers.times do
-      spawn do
-        loop do
-          case value = channel.receive?
-          when Array
-            value.each do |test|
-              suite, name, proc = test
-              suite.new(reporter).run_one(name, proc)
-            end
-          when Runnable::Data
-            suite, name, proc = value
-            suite.new(reporter).run_one(name, proc)
-          else
-            completed.send(nil)
-            break
-          end
-        end
-      end
-    end
-
+    options.fibers.times { spawn_worker(channel, completed) }
     reporter.start
-
-    if options.chaos
-      # collect & shuffle all tests for all suites:
-      tests = [] of Runnable::Data
-      Runnable.runnables.each do |suite|
-        tests += suite.collect_tests
-      end
-      tests.shuffle!(random)
-      tests.each { |test| channel.send(test) }
-    else
-      # shufle each suite, then shuffle tests for each suite:
-      Runnable.runnables.shuffle!(random).each do |suite|
-        tests = suite.collect_tests
-        tests.shuffle!(random)
-        tests.each { |test| channel.send(test) }
-      end
-    end
-
-    channel.close
+    randomize_and_run_tests(channel)
     options.fibers.times { completed.receive }
 
     reporter.report
@@ -160,15 +122,57 @@ module Minitest
     reporter.passed?
   end
 
-  def self.after_run
+  private def self.spawn_worker(channel, completed) : Nil
+    spawn do
+      loop do
+        case value = channel.receive?
+        when Array
+          value.each do |test|
+            suite, name, proc = test
+            suite.new(reporter).run_one(name, proc)
+          end
+        when Runnable::Data
+          suite, name, proc = value
+          suite.new(reporter).run_one(name, proc)
+        else
+          completed.send(nil)
+          break
+        end
+      end
+    end
+  end
+
+  private def self.randomize_and_run_tests(channel) : Nil
+    random = Random::PCG32.new(options.seed.to_u64)
+
+    if options.chaos
+      # collect & shuffle all tests for all suites:
+      Runnable.runnables
+        .reduce([] of Runnable::Data) { |tests, suite| tests += suite.collect_tests }
+        .shuffle!(random)
+        .each { |test| channel.send(test) }
+    else
+      # shufle each suite, then shuffle tests for each suite:
+      Runnable.runnables.shuffle!(random).each do |suite|
+        suite
+          .collect_tests
+          .shuffle!(random)
+          .each { |test| channel.send(test) }
+      end
+    end
+
+    channel.close
+  end
+
+  def self.after_run : Array(Proc(Nil))
     @@after_run ||= [] of ->
   end
 
-  def self.after_run(&block)
+  def self.after_run(&block : ->) : Nil
     after_run << block
   end
 
-  def self.exit(status = 1)
+  def self.exit(status : Int32 = 1) : NoReturn
     after_run.each(&.call)
     exit status
   end

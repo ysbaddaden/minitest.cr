@@ -16,11 +16,11 @@ module Minitest
   end
 
   class Test < Runnable
-    def should_run?(name)
+    def should_run?(name) : Bool
       focused_test?(name) && super(name)
     end
 
-    def focused_test?(name)
+    def focused_test?(name) : Bool
       if FOCUSES.empty?
         true
       else
