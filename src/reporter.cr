@@ -1,4 +1,5 @@
 require "colorize"
+require "mutex"
 
 module Minitest
   class AbstractReporter

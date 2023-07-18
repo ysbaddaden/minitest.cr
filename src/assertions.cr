@@ -1,4 +1,3 @@
-require "mutex"
 require "./diff"
 
 lib LibC
@@ -59,8 +58,6 @@ module Minitest
   end
 
   module Assertions
-    @@mutex = Mutex.new
-
     def diff(expected : String, actual : String)
       diff = Diff.line_diff(expected, actual)
 
