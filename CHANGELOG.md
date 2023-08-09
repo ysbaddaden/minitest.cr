@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.2.1
+
+Fixes:
+- Support for PCRE2
+- Remove unused `@@mutex` from Minitest::Assertions
+- Proper release (v1.2.0 was invalid with Shards)
+
 ## v1.1.0
 
 Fixes:
