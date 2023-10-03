@@ -25,10 +25,9 @@ module Minitest
     macro describe(name, &block)
       {%
         class_name = name.id.stringify
-          .gsub(/[^0-9a-zA-Z:]+/, "_")
-          .gsub(/^_|_$/, "")
-          .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
-          .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
+          .split("::")
+          .map(&.gsub(/[^0-9a-zA-Z]+/, "_").gsub(/^_|_$/, "").capitalize)
+          .join("::")
       %}
       class {{ class_name.id }}Spec < {{ @type }}
         def self.name
@@ -40,7 +39,7 @@ module Minitest
     end
 
     macro it(name = "anonymous", &block)
-      def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}
+      def test_{{ name.strip.gsub(/[^0-9a-zA-Z]+/, "_").id }}
         {{ yield }}
       end
     end
@@ -55,10 +54,9 @@ end
 macro describe(name, &block)
   {%
     class_name = name.id.stringify
-      .gsub(/[^0-9a-zA-Z:]+/, "_")
-      .gsub(/^_|_$/, "")
-      .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
-      .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::")
+      .split("::")
+      .map(&.gsub(/[^0-9a-zA-Z]+/, "_").gsub(/^_|_$/, "").capitalize)
+      .join("::")
   %}
   class {{ class_name.id }}Spec < Minitest::Spec
     def self.name
