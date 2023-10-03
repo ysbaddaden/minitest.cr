@@ -43,6 +43,10 @@ describe Minitest::Spec do
   describe("ending with special chars #") {}
   it(". has leading and ending special chars .") {}
 
+  describe("has ::colons:") do
+    it("has ::colons:") {}
+  end
+
   describe "let" do
     let(:foo) { Foo.new }
 
