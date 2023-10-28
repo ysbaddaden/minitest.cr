@@ -2,6 +2,7 @@ require "../src/autorun"
 
 class ExpectationsTest < Minitest::Spec
   class Foo; end
+
   class Bar; end
 
   let(:foo) { Foo.new }
