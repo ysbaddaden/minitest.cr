@@ -2,7 +2,9 @@ require "../src/autorun"
 
 class AssertionsTest < Minitest::Test
   class Failure < Exception; end
+
   class Foo; end
+
   class Bar; end
 
   def test_assert
@@ -24,7 +26,6 @@ class AssertionsTest < Minitest::Test
     refute { false }
     assert_raises(Minitest::Assertion) { refute { true } }
   end
-
 
   def test_assert_equal
     assert_equal 1, 1
@@ -72,8 +73,8 @@ class AssertionsTest < Minitest::Test
   end
 
   def test_assert_equal_diffs_pretty_printed_objects
-    a = { code: 1, message: "some long message to force a line break in pretty inspect", status: "failed" }
-    b = { code: 3, message: "some long message to force a line break in pretty inspect", status: "failed" }
+    a = {code: 1, message: "some long message to force a line break in pretty inspect", status: "failed"}
+    b = {code: 3, message: "some long message to force a line break in pretty inspect", status: "failed"}
     ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
     assert <<-PLAIN == ex.message
     --- expected
@@ -86,8 +87,8 @@ class AssertionsTest < Minitest::Test
   end
 
   def test_assert_equal_diffs_pretty_printed_objects_with_swapped_a_and_b
-    a = { code: 1, message: "some short message", status: "failed" }
-    b = { code: 3, message: "some long message to force a line break in pretty inspect", status: "failed" }
+    a = {code: 1, message: "some short message", status: "failed"}
+    b = {code: 3, message: "some long message to force a line break in pretty inspect", status: "failed"}
 
     ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
     assert <<-PLAIN == ex.message
@@ -117,7 +118,6 @@ class AssertionsTest < Minitest::Test
     assert_raises(Minitest::Assertion) { refute_equal 1, 1 }
   end
 
-
   def test_assert_same
     foo = Foo.new
     assert_same foo, foo
@@ -129,7 +129,6 @@ class AssertionsTest < Minitest::Test
     refute_same foo, Foo.new
     assert_raises(Minitest::Assertion) { refute_same foo, foo }
   end
-
 
   def test_assert_match_with_regex
     assert_match /test/, "this is a test"
@@ -151,7 +150,6 @@ class AssertionsTest < Minitest::Test
     assert_raises(Minitest::Assertion) { refute_match "bar", "foo bar baz" }
   end
 
-
   def test_assert_empty
     assert_empty [] of Int32
     assert_empty({} of Int32 => Int32)
@@ -160,11 +158,10 @@ class AssertionsTest < Minitest::Test
 
   def test_refute_empty
     refute_empty [1, 2, 3]
-    refute_empty({ 1 => 2, 3 => 4 })
+    refute_empty({1 => 2, 3 => 4})
     assert_raises(Minitest::Assertion) { refute_empty([] of Int32) }
-    #assert_raises(Minitest::Assertion) { refute_empty({} of Int32 => Int32) }
+    # assert_raises(Minitest::Assertion) { refute_empty({} of Int32 => Int32) }
   end
-
 
   def test_assert_nil
     assert_nil nil
@@ -175,7 +172,6 @@ class AssertionsTest < Minitest::Test
     refute_nil 1
     assert_raises(Minitest::Assertion) { refute_nil nil }
   end
-
 
   def test_assert_in_delta
     assert_in_delta 0, 1, 1
@@ -189,7 +185,6 @@ class AssertionsTest < Minitest::Test
     refute_in_delta 0.0, 1.0 / 1000, 0.0001
     assert_raises(Minitest::Assertion) { refute_in_delta 0, 1, 1 }
   end
-
 
   def test_assert_in_epsilon
     assert_in_epsilon 10000, 9991
@@ -217,7 +212,6 @@ class AssertionsTest < Minitest::Test
     assert_raises(Minitest::Assertion) { refute_in_epsilon 10000, 9990 }
   end
 
-
   def test_assert_includes
     assert_includes [1, 2, 3], 2
     assert_raises(Minitest::Assertion) { assert_includes [1, 2], 3 }
@@ -227,7 +221,6 @@ class AssertionsTest < Minitest::Test
     refute_includes [1, 2, 3], 4
     assert_raises(Minitest::Assertion) { refute_includes [1, 2], 2 }
   end
-
 
   def test_assert_instance_of
     assert_instance_of Foo, Foo.new
@@ -239,7 +232,6 @@ class AssertionsTest < Minitest::Test
     assert_raises(Minitest::Assertion) { refute_instance_of Foo, Foo.new }
   end
 
-
   def test_assert_responds_to
     assert_responds_to Foo.new, :inspect
     assert_raises(Minitest::Assertion) { assert_responds_to Foo.new, :foo }
@@ -249,7 +241,6 @@ class AssertionsTest < Minitest::Test
     refute_responds_to Foo.new, :foo
     assert_raises(Minitest::Assertion) { refute_responds_to Foo.new, :inspect }
   end
-
 
   def test_assert_raises
     ex = assert_raises { raise "error message" }
@@ -271,7 +262,6 @@ class AssertionsTest < Minitest::Test
     assert_match "AssertionsTest::Failure", ex.message
     assert_match "Exception", ex.message
   end
-
 
   def test_capture_io
     # captures io (and flushes):
@@ -372,7 +362,6 @@ class AssertionsTest < Minitest::Test
     end
   end
 
-
   def test_skip
     ex = assert_raises(Minitest::Skip) { skip }
     assert_equal "", ex.message
@@ -396,6 +385,6 @@ class AssertionsTest < Minitest::Test
   def test_message
     assert_equal "default", (message(nil) { "default" }).call
     assert_equal "string\ndefault", (message("string") { "default" }).call
-    assert_equal "proc:string\ndefault", (message(-> { "proc:string" }) { "default" }).call
+    assert_equal "proc:string\ndefault", (message(->{ "proc:string" }) { "default" }).call
   end
 end

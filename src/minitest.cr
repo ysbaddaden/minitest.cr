@@ -7,8 +7,8 @@ require "./spec"
 
 module Minitest
   class Options
-    property chaos : Bool
-    property verbose : Bool
+    property? chaos : Bool
+    property? verbose : Bool
     property fibers : Int32
     getter pattern : String | Regex | Nil
     getter seed : UInt32
@@ -36,11 +36,11 @@ module Minitest
       io << "Run options: --seed "
       seed.to_s(io)
 
-      if verbose
+      if verbose?
         io << " --verbose"
       end
 
-      if chaos
+      if chaos?
         io << " --chaos"
       end
 
@@ -145,10 +145,10 @@ module Minitest
   private def self.randomize_and_run_tests(channel) : Nil
     random = Random::PCG32.new(options.seed.to_u64)
 
-    if options.chaos
+    if options.chaos?
       # collect & shuffle all tests for all suites:
       Runnable.runnables
-        .reduce([] of Runnable::Data) { |tests, suite| tests += suite.collect_tests }
+        .reduce([] of Runnable::Data) { |tests, suite| tests + suite.collect_tests }
         .shuffle!(random)
         .each { |test| channel.send(test) }
     else

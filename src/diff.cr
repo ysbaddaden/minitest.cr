@@ -10,8 +10,8 @@ struct Minitest::Diff(T)
 
     def reverse : self
       case self
-      in DELETED then APPENDED
-      in APPENDED then DELETED
+      in DELETED   then APPENDED
+      in APPENDED  then DELETED
       in UNCHANGED then UNCHANGED
       end
     end
@@ -21,7 +21,6 @@ struct Minitest::Diff(T)
     type : Type,
     a : Range(Int32, Int32),
     b : Range(Int32, Int32) do
-
     def append(other : self) : self
       copy_with(
         a: a.begin...other.a.end,

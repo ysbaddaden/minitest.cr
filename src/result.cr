@@ -16,14 +16,19 @@ module Minitest
     end
 
     def skipped? : Bool
-      failures.any?(&.is_a?(Skip))
+      failures.any?(Skip)
     end
 
     def result_code : Char
-      return '.' if passed?
-      return 'S' if skipped?
-      return 'F' if failures.any?(&.is_a?(Assertion))
-      return 'E'
+      if passed?
+        '.'
+      elsif skipped?
+        'S'
+      elsif failures.any?(Assertion)
+        'F'
+      else
+        'E'
+      end
     end
 
     def failure : Assertion | Skip | UnexpectedError
