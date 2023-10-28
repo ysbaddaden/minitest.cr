@@ -28,6 +28,10 @@ struct Minitest::Diff(T)
         b: b.begin...other.b.end,
       )
     end
+
+    def reverse : self
+      Delta.new(@type.reverse, b, a)
+    end
   end
 
   def self.line_diff(a : String, b : String)
@@ -38,10 +42,9 @@ struct Minitest::Diff(T)
   getter b : T
   @m : Int32
   @n : Int32
-  @swap : Bool
 
   def initialize(a : T, b : T)
-    if @swap = (b.size < a.size)
+    if swap = (b.size < a.size)
       @a, @m = b, b.size
       @b, @n = a, a.size
     else
@@ -59,6 +62,11 @@ struct Minitest::Diff(T)
     p = calculate_edit_distance
     generate_patch(p)
     generate_deltas
+
+    if swap
+      @a, @b = @b, @a
+      @deltas = @deltas.map(&.reverse)
+    end
 
     # the algorithm places appends before deletes, but diffs usually show the
     # opposite: the deleted (original) then the appended (that replaces the
@@ -107,12 +115,7 @@ struct Minitest::Diff(T)
   end
 
   private def add_delta(type : Type, a, b)
-    delta =
-      if @swap
-        Delta.new(type.reverse, b, a)
-      else
-        Delta.new(type, a, b)
-      end
+    delta = Delta.new(type, a, b)
 
     if (last = @deltas.last?) && delta.type == last.type
       @deltas[-1] = last.append(delta)

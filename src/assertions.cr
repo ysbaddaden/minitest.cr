@@ -68,17 +68,11 @@ module Minitest
         diff.each do |delta|
           case delta.type
           when .unchanged?
-            delta.a.each do |i|
-              str << ' ' << diff.a[i] << '\n'
-            end
+            delta.a.each { |i| str << ' ' << diff.a[i] << '\n' }
           when .appended?
-            delta.b.each do |i|
-              str << '+' << diff.b[i] << '\n'
-            end
+            delta.b.each { |i| str << '+' << diff.b[i] << '\n' }
           when .deleted?
-            delta.a.each do |i|
-              str << '-' << diff.a[i] << '\n'
-            end
+            delta.a.each { |i| str << '-' << diff.a[i] << '\n' }
           end
         end
       end.chomp

@@ -85,6 +85,31 @@ class AssertionsTest < Minitest::Test
     PLAIN
   end
 
+  def test_assert_equal_diffs_pretty_printed_objects_with_swapped_a_and_b
+    a = { code: 1, message: "some short message", status: "failed" }
+    b = { code: 3, message: "some long message to force a line break in pretty inspect", status: "failed" }
+
+    ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
+    assert <<-PLAIN == ex.message
+    --- expected
+    +++ actual
+    -{code: 1, message: "some short message", status: "failed"}
+    +{code: 3,
+    + message: "some long message to force a line break in pretty inspect",
+    + status: "failed"}
+    PLAIN
+
+    ex = assert_raises(Minitest::Assertion) { assert_equal b, a }
+    assert <<-PLAIN == ex.message
+    --- expected
+    +++ actual
+    -{code: 3,
+    - message: "some long message to force a line break in pretty inspect",
+    - status: "failed"}
+    +{code: 1, message: "some short message", status: "failed"}
+    PLAIN
+  end
+
   def test_refute_equal
     refute_equal 1, 2
     refute_equal "abcd", "dcba"
