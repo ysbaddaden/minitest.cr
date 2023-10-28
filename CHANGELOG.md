@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.2.3
+
+Fixes:
+- Special characters in spec `describe` and `it` names (e.g. `:`);
+- Runner crashes when diff algorithm swapped expected and actual strings.
+
 ## v1.2.2
 
 Fixes:
