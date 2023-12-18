@@ -68,7 +68,7 @@ module Minitest
 
       opts.on("-h", "--help", "Display this help") do
         puts opts
-        exit
+        exit(0)
       end
 
       opts.on("-s SEED", "--seed SEED", "Sets random seed. Also via SEED environment variable.") do |seed|
@@ -174,6 +174,6 @@ module Minitest
 
   def self.exit(status : Int32 = 1) : NoReturn
     after_run.each(&.call)
-    exit status
+    ::exit status
   end
 end
