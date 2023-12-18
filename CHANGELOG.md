@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.3.0
+
+Features:
+- Allow let with type declaration in specs.
+- Added type signatures (mostly return types).
+- Code refactoring to reduce some complexity.
+
+Fixes:
+- Infinite recursion with --help option
+- Ameba warnings and crystal tool format.
+
 ## v1.2.3
 
 Fixes:
