@@ -38,7 +38,7 @@ module Minitest
       {%
         class_name = name.id.stringify
           .split("::")
-          .map(&.gsub(/[^0-9a-zA-Z]+/, "_").gsub(/^_|_$/, "").capitalize)
+          .map(&.gsub(/[^\p{L}\p{N}]+/, "_").gsub(/^_|_$/, "").camelcase)
           .join("::")
       %}
       class {{ class_name.id }}Spec < {{ @type }}
@@ -51,7 +51,7 @@ module Minitest
     end
 
     macro it(name = "anonymous", &block)
-      def test_{{ name.strip.gsub(/[^0-9a-zA-Z]+/, "_").id }}
+      def test_{{ name.strip.gsub(/[^\p{L}\p{N}]+/, "_").id }}
         {{ yield }}
       end
     end
@@ -67,7 +67,7 @@ macro describe(name, &block)
   {%
     class_name = name.id.stringify
       .split("::")
-      .map(&.gsub(/[^0-9a-zA-Z]+/, "_").gsub(/^_|_$/, "").capitalize)
+      .map(&.gsub(/[^\p{L}\p{N}]+/, "_").gsub(/^_|_$/, "").camelcase)
       .join("::")
   %}
   class {{ class_name.id }}Spec < Minitest::Spec

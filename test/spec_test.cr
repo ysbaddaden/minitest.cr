@@ -74,3 +74,11 @@ describe Minitest::Spec do
     end
   end
 end
+
+describe "unicode (ЩÉ本语)" do
+  describe "nested (한ةُ )" do
+    it "汉语, 日本語, français, ..." do
+      skip
+    end
+  end
+end
