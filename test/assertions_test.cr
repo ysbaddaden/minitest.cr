@@ -385,6 +385,6 @@ class AssertionsTest < Minitest::Test
   def test_message
     assert_equal "default", (message(nil) { "default" }).call
     assert_equal "string\ndefault", (message("string") { "default" }).call
-    assert_equal "proc:string\ndefault", (message(->{ "proc:string" }) { "default" }).call
+    assert_equal "proc:string\ndefault", (message(-> { "proc:string" }) { "default" }).call
   end
 end

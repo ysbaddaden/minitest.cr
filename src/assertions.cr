@@ -365,12 +365,12 @@ module Minitest
       if message.blank?
         block
       else
-        ->{ "#{message}\n#{block.call}" }
+        -> { "#{message}\n#{block.call}" }
       end
     end
 
     def message(message : Proc(String), &block : -> String) : -> String
-      ->{ "#{message.call}\n#{block.call}" }
+      -> { "#{message.call}\n#{block.call}" }
     end
 
     private def need_diff?(expected, actual) : Bool
