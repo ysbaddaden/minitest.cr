@@ -110,7 +110,22 @@ module Minitest
     # makes sure that reporter is initialized before spawning worker fibers:
     raise "BUG: no minitest reporter" unless self.reporter
 
-    options.fibers.times { spawn_worker(channel, completed) }
+    {% if Fiber.has_constant?(:ExecutionContext) %}
+      workers_count = Fiber::ExecutionContext.default_workers_count
+      execution_context = Fiber::ExecutionContext::MultiThreaded.new("MINITEST", workers_count)
+    {% end %}
+
+    options.fibers.times do |i|
+      {% if Fiber.has_constant?(:ExecutionContext) %}
+        execution_context.spawn(name: "minitest:worker-#{i}") do
+          worker_loop(channel, completed)
+        end
+      {% else %}
+        spawn(name: "minitest:worker-#{i}") do
+          worker_loop(channel, completed)
+        end
+      {% end %}
+    end
     reporter.start
     randomize_and_run_tests(channel)
     options.fibers.times { completed.receive }
@@ -122,22 +137,20 @@ module Minitest
     reporter.passed?
   end
 
-  private def self.spawn_worker(channel, completed) : Nil
-    spawn do
-      loop do
-        case value = channel.receive?
-        when Array
-          value.each do |test|
-            suite, name, proc = test
-            suite.new(reporter).run_one(name, proc)
-          end
-        when Runnable::Data
-          suite, name, proc = value
+  private def self.worker_loop(channel, completed) : Nil
+    loop do
+      case value = channel.receive?
+      when Array
+        value.each do |test|
+          suite, name, proc = test
           suite.new(reporter).run_one(name, proc)
-        else
-          completed.send(nil)
-          break
         end
+      when Runnable::Data
+        suite, name, proc = value
+        suite.new(reporter).run_one(name, proc)
+      else
+        completed.send(nil)
+        break
       end
     end
   end
