@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v1.4.0
+
+Features:
+- start a MT context when execution contexts are enabled
+
+Fixes:
+- spec: support unicode in describe/it
+- spec: fixes some namespacing issues (use camelcase instead of capitalize)
+
 ## v1.3.0
 
 Features:
