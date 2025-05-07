@@ -135,7 +135,9 @@ module Minitest
 
     def assert_same(expected, actual, message = nil, file = __FILE__, line = __LINE__) : Bool
       msg = self.message(message) {
-        "Expected #{actual.inspect} (oid=#{actual.object_id}) to be the same as #{expected.inspect} (oid=#{expected.object_id})"
+        actual_oid = actual.responds_to?(:object_id) ? " (oid=#{actual.object_id})" : ""
+        expected_oid = expected.responds_to?(:object_id) ? " (oid=#{expected.object_id})" : ""
+        "Expected #{actual.inspect}#{actual_oid} to be the same as #{expected.inspect}#{expected_oid}"
       }
       if expected.responds_to?(:same?)
         assert expected.same?(actual), msg, file, line
@@ -146,7 +148,9 @@ module Minitest
 
     def refute_same(expected, actual, message = nil, file = __FILE__, line = __LINE__) : Bool
       msg = self.message(message) {
-        "Expected #{actual.inspect} (oid=#{actual.object_id}) to not be the same as #{expected.inspect} (oid=#{expected.object_id})"
+        actual_oid = actual.responds_to?(:object_id) ? " (oid=#{actual.object_id})" : ""
+        expected_oid = expected.responds_to?(:object_id) ? " (oid=#{expected.object_id})" : ""
+        "Expected #{actual.inspect}#{actual_oid} to not be the same as #{expected.inspect}#{expected_oid}"
       }
       if expected.responds_to?(:same?)
         refute expected.same?(actual), msg, file, line
