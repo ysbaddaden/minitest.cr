@@ -127,9 +127,9 @@ module Minitest
 
     def report : Nil
       @total_time = Time.monotonic - start_time
-      @failures = results.count(&.failure.is_a?(Assertion))
-      @errors = results.count(&.failure.is_a?(UnexpectedError))
-      @skips = results.count(&.failure.is_a?(Skip))
+      @failures = results.count(&.failures.first?.is_a?(Assertion))
+      @errors = results.count(&.failures.first?.is_a?(UnexpectedError))
+      @skips = results.count(&.failures.first?.is_a?(Skip))
     end
 
     def passed? : Bool
@@ -174,6 +174,83 @@ module Minitest
 
       if skips > 0 && !options.verbose?
         puts "\nYou have skipped tests. Run with --verbose for details."
+      end
+    end
+  end
+
+  class JunitReporter < StatisticsReporter
+    def self.new(path : String, options)
+      new(File.new(path, "w"), options)
+    end
+
+    def initialize(@io : IO, options)
+      super(options)
+    end
+
+    def record(result) : Nil
+      @mutex.synchronize do
+        @count += 1
+        results << result
+      end
+    end
+
+    def report : Nil
+      super
+
+      @io.puts %(<?xml version="1.0" encoding="UTF-8"?>)
+      @io.puts %(<testsuite tests="#{count}" failures="#{failures}" errors="#{errors}" skipped="#{skips}" time="#{total_time.total_seconds}">)
+      results.each do |result|
+        if result.passed?
+          @io.puts %(<testcase classname="#{xml_escape(result.class_name)}" name="#{xml_escape(result.name)}" time="#{result.time.total_seconds}"></testcase>)
+        else
+          exception = result.failure
+          @io.puts %(<testcase classname="#{xml_escape(result.class_name)}" name="#{xml_escape(result.name)}" time="#{result.time.total_seconds}" file="#{xml_escape(exception.__minitest_file)}" line="#{xml_escape(exception.__minitest_line)}">)
+
+          case exception
+          when Assertion
+            @io.puts %(<failure message="#{xml_escape(exception.message)}"></failure>)
+          when Skip
+            @io.puts %(<skipped message="#{xml_escape(exception.message)}"/>)
+          else
+            # UnexpectedError
+            @io.puts %(<error message="#{xml_escape(exception.message)}" type="#{xml_escape(exception.class.name)}">)
+            if backtrace = exception.backtrace?
+              @io.puts xml_escape(backtrace.join('\n'))
+            end
+            @io.puts %(</error>)
+          end
+          @io.puts %(</testcase>)
+        end
+      end
+      @io.puts %(</testsuite>)
+
+      @io.close
+    end
+
+    private def xml_escape(value : Int32 | Nil) : Nil
+      value
+    end
+
+    private def xml_escape(value : String) : String
+      String.build do |str|
+        value.each_char do |char|
+          case char
+          when '&'
+            str << "&amp;"
+          when '<'
+            str << "&lt;"
+          when '>'
+            str << "&gt;"
+          when '"'
+            str << "&quot;"
+          when '\''
+            str << "&apos;"
+          when .control?
+            char.to_s.inspect_unquoted(str)
+          else
+            str << char
+          end
+        end
       end
     end
   end

@@ -12,6 +12,7 @@ module Minitest
     property fibers : Int32
     getter pattern : String | Regex | Nil
     getter seed : UInt32
+    property? junit : String?
 
     def initialize
       @chaos = false
@@ -79,6 +80,10 @@ module Minitest
         options.verbose = true
       end
 
+      opts.on("-j PATH", "--junit PATH", "Generate junit report") do |path|
+        options.junit = path
+      end
+
       opts.on("-p FIBERS", "--parallel FIBERS", "Parallelize runs.") do |fibers|
         options.fibers = fibers.to_i
       end
@@ -97,6 +102,9 @@ module Minitest
     CompositeReporter.new(options).tap do |reporter|
       reporter << SummaryReporter.new(options)
       reporter << ProgressReporter.new(options)
+      if path = options.junit?
+        reporter << JunitReporter.new(path, options)
+      end
     end
   end
 
