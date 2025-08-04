@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.5.0
+
+Features:
+- Add junit reporter (basic)
+
+Fixes:
+- `assert_same` fails to compile when using pointers
+
 ## v1.4.0
 
 Features:
