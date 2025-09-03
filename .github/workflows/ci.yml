@@ -18,21 +18,21 @@ on:
 
 jobs:
   format:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - uses: crystal-lang/install-crystal@v1
       - run: crystal tool format
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - uses: crystal-lang/install-crystal@v1
       - run: make test
 
   test_mt:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - uses: crystal-lang/install-crystal@v1
