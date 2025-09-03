@@ -13,6 +13,7 @@ module Minitest
     getter pattern : String | Regex | Nil
     getter seed : UInt32
     property? junit : String?
+    property? color : Bool = Colorize.enabled?
 
     def initialize
       @chaos = false
@@ -84,6 +85,14 @@ module Minitest
         options.junit = path
       end
 
+      opts.on("--color", "Enable ANSI colored output") do
+        options.color = true
+      end
+
+      opts.on("--no-color", "Disable ANSI colored output") do
+        options.color = false
+      end
+
       opts.on("-p FIBERS", "--parallel FIBERS", "Parallelize runs.") do |fibers|
         options.fibers = fibers.to_i
       end
@@ -111,6 +120,8 @@ module Minitest
   def self.run(args = nil) : Bool
     process_args(args) if args
     puts options
+
+    Colorize.enabled = options.color?
 
     channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.fibers * 4)
     completed = Channel(Nil).new
