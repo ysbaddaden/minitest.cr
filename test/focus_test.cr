@@ -59,13 +59,13 @@ class FocusTest < Minitest::Test
   def test_runs_only_focused_tests
     stdout = execute("--verbose", pass: true)
 
-    assert_match /FocusTest#test_will_run = [\d.]+ s = \e\[32m\./, stdout
-    assert_match /FocusTest#test_will_also_run = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /FocusTest#test_wont_run = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /FocusTest#test_wont_run_too = [\d.]+ s = \e\[41m\./, stdout
+    assert_match /FocusTest#test_will_run = [\d.]+ s = \./, stdout
+    assert_match /FocusTest#test_will_also_run = [\d.]+ s = \./, stdout
+    refute_match /FocusTest#test_wont_run = [\d.]+ s = \./, stdout
+    refute_match /FocusTest#test_wont_run_too = [\d.]+ s = \./, stdout
 
-    assert_match /Focus#test_shall_run = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /Focus#test_shall_not_run = [\d.]+ s = \e\[41m\./, stdout
+    assert_match /Focus#test_shall_run = [\d.]+ s = \./, stdout
+    refute_match /Focus#test_shall_not_run = [\d.]+ s = \./, stdout
 
     assert_match "3 tests, 0 failures, 0 errors, 0 skips", stdout
   end

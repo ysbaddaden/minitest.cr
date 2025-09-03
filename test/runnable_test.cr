@@ -81,13 +81,13 @@ class RunnableTest < Minitest::Test
 
   def test_runs_all_tests
     stdout = execute("--verbose", pass: false)
-    assert_match /ABCTest#test_success = [\d.]+ s = \e\[32m\./, stdout
-    assert_match /ABCTest#test_another_success = [\d.]+ s = \e\[32m\./, stdout
-    assert_match /ABCTest#test_skip = [\d.]+ s = \e\[33mS/, stdout
-    assert_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
-    assert_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
-    assert_match /ABC#test_success = [\d.]+ s = \e\[32m\./, stdout
-    assert_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
+    assert_match /ABCTest#test_success = [\d.]+ s = \./, stdout
+    assert_match /ABCTest#test_another_success = [\d.]+ s = \./, stdout
+    assert_match /ABCTest#test_skip = [\d.]+ s = S/, stdout
+    assert_match /ABCTest#test_flunk = [\d.]+ s = F/, stdout
+    assert_match /ABCTest#test_error = [\d.]+ s = E/, stdout
+    assert_match /ABC#test_success = [\d.]+ s = \./, stdout
+    assert_match /ABC#test_fails = [\d.]+ s = F/, stdout
     assert_match "11 tests, 4 failures, 1 errors, 3 skips", stdout
   end
 
@@ -105,16 +105,16 @@ class RunnableTest < Minitest::Test
 
   def test_reports_exceptions
     stdout = execute("--verbose", pass: false)
-    assert_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
+    assert_match /ABCTest#test_error = [\d.]+ s = E/, stdout
     assert_match "Exception: oopsie\n", stdout
     assert_match /test\/runnable_.+_test.cr:\d+:\d+ in 'test_error'/, stdout
   end
 
   def test_skip
     stdout = execute("--name", "/skip/", "--verbose", pass: true)
-    assert_match /ABCTest#test_skip = [\d.]+ s = \e\[33mS/, stdout
-    assert_match /ABCTest#test_skip_message = [\d.]+ s = \e\[33mS/, stdout
-    assert_match /ABCTest#test_skip_symbol = [\d.]+ s = \e\[33mS/, stdout
+    assert_match /ABCTest#test_skip = [\d.]+ s = S/, stdout
+    assert_match /ABCTest#test_skip_message = [\d.]+ s = S/, stdout
+    assert_match /ABCTest#test_skip_symbol = [\d.]+ s = S/, stdout
 
     assert_match "not_implemented\n", stdout
     assert_match "it doesn't work\n", stdout
@@ -122,9 +122,9 @@ class RunnableTest < Minitest::Test
 
   def test_flunk
     stdout = execute("--name", "/flunk/", "--verbose", pass: false)
-    assert_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
-    assert_match /ABCTest#test_flunk_message = [\d.]+ s = \e\[41mF/, stdout
-    assert_match /ABCTest#test_flunk_symbol = [\d.]+ s = \e\[41mF/, stdout
+    assert_match /ABCTest#test_flunk = [\d.]+ s = F/, stdout
+    assert_match /ABCTest#test_flunk_message = [\d.]+ s = F/, stdout
+    assert_match /ABCTest#test_flunk_symbol = [\d.]+ s = F/, stdout
 
     assert_match "todo\n", stdout
     assert_match "it crashes randomly\n", stdout
@@ -132,33 +132,50 @@ class RunnableTest < Minitest::Test
 
   def test_filters_by_exact_pattern
     stdout = execute("--name", "test_success", "--verbose", pass: true)
-    assert_match /ABCTest#test_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABCTest#test_another_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABCTest#test_skip = [\d.]+ s = \e\[33mS/, stdout
-    refute_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
-    refute_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
-    assert_match /ABC#test_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
+    assert_match /ABCTest#test_success = [\d.]+ s = \./, stdout
+    refute_match /ABCTest#test_another_success = [\d.]+ s = \./, stdout
+    refute_match /ABCTest#test_skip = [\d.]+ s = S/, stdout
+    refute_match /ABCTest#test_flunk = [\d.]+ s = F/, stdout
+    refute_match /ABCTest#test_error = [\d.]+ s = E/, stdout
+    assert_match /ABC#test_success = [\d.]+ s = \./, stdout
+    refute_match /ABC#test_fails = [\d.]+ s = F/, stdout
     assert_match "2 tests, 0 failures, 0 errors, 0 skips", stdout
   end
 
   def test_filters_by_regex_pattern
     stdout = execute("--name", "/success/", "--verbose", pass: true)
+    assert_match /ABCTest#test_success = [\d.]+ s = \./, stdout
+    assert_match /ABCTest#test_another_success = [\d.]+ s = \./, stdout
+    refute_match /ABCTest#test_skip = [\d.]+ s = S/, stdout
+    refute_match /ABCTest#test_flunk = [\d.]+ s = F/, stdout
+    refute_match /ABCTest#test_error = [\d.]+ s = E/, stdout
+    assert_match /ABC#test_success = [\d.]+ s = \./, stdout
+    refute_match /ABC#test_fails = [\d.]+ s = F/, stdout
+    assert_match "3 tests, 0 failures, 0 errors, 0 skips", stdout
+  end
+
+  def test_colors
+    stdout = execute("--color", "--verbose", pass: false)
     assert_match /ABCTest#test_success = [\d.]+ s = \e\[32m\./, stdout
     assert_match /ABCTest#test_another_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABCTest#test_skip = [\d.]+ s = \e\[33mS/, stdout
-    refute_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
-    refute_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
+    assert_match /ABCTest#test_skip = [\d.]+ s = \e\[33mS/, stdout
+    assert_match /ABCTest#test_flunk = [\d.]+ s = \e\[41mF/, stdout
+    assert_match /ABCTest#test_error = [\d.]+ s = \e\[41mE/, stdout
     assert_match /ABC#test_success = [\d.]+ s = \e\[32m\./, stdout
-    refute_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
-    assert_match "3 tests, 0 failures, 0 errors, 0 skips", stdout
+    assert_match /ABC#test_fails = [\d.]+ s = \e\[41mF/, stdout
+    assert_match "11 tests, 4 failures, 1 errors, 3 skips", stdout
   end
 
   def execute(*args, pass = true)
     stdout = IO::Memory.new
     stderr = IO::Memory.new
 
-    rs = Process.run(BINARY_PATH, args, output: stdout, error: stderr)
+    rs =
+      {% if flag?(:interpreted) %}
+        Process.run(CRYSTAL, ["i", SOURCE_PATH, "--", *args], output: stdout, error: stderr)
+      {% else %}
+        Process.run(BINARY_PATH, args, output: stdout, error: stderr)
+      {% end %}
     if pass
       assert rs.success?, "expected run to pass, but it failed:\n#{stderr.rewind}"
     else
