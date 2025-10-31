@@ -36,6 +36,7 @@ jobs:
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@v5
 
       - if: matrix.os != 'ubuntu-24.04-arm'
