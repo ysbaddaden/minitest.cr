@@ -79,8 +79,8 @@ module Minitest
     end
 
     def diff(expected, actual) : String
-      left = expected.pretty_inspect.gsub("\\n", '\n') unless expected.is_a?(String)
-      right = actual.pretty_inspect.gsub("\\n", '\n') unless actual.is_a?(String)
+      left = expected.pretty_inspect(newline: "\n") unless expected.is_a?(String)
+      right = actual.pretty_inspect(newline: "\n") unless actual.is_a?(String)
       diff(left, right)
     end
 
