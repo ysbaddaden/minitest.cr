@@ -56,6 +56,10 @@ class AssertionsTest < Minitest::Test
     PLAIN
 
     ex = assert_raises(Minitest::Assertion) { assert_equal correct, wrong }
+
+    pp ex
+    puts ex.message
+
     assert <<-PLAIN == ex.message
     --- expected
     +++ actual
@@ -76,6 +80,10 @@ class AssertionsTest < Minitest::Test
     a = {code: 1, message: "some long message to force a line break in pretty inspect", status: "failed"}
     b = {code: 3, message: "some long message to force a line break in pretty inspect", status: "failed"}
     ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
+
+    pp ex
+    puts ex.message
+
     assert <<-PLAIN == ex.message
     --- expected
     +++ actual
@@ -91,6 +99,10 @@ class AssertionsTest < Minitest::Test
     b = {code: 3, message: "some long message to force a line break in pretty inspect", status: "failed"}
 
     ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
+
+    pp ex
+    puts ex.message
+
     assert <<-PLAIN == ex.message
     --- expected
     +++ actual
@@ -101,6 +113,10 @@ class AssertionsTest < Minitest::Test
     PLAIN
 
     ex = assert_raises(Minitest::Assertion) { assert_equal b, a }
+
+    pp ex
+    puts ex.message
+
     assert <<-PLAIN == ex.message
     --- expected
     +++ actual
