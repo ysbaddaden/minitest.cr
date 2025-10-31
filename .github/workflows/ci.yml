@@ -20,20 +20,37 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - uses: crystal-lang/install-crystal@v1
       - run: crystal tool format
 
   test:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - ubuntu-24.04-arm
+        - macos-latest
+        - macos-15-intel
+        - windows-latest
+    runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v2
-      - uses: crystal-lang/install-crystal@v1
-      - run: make test
+      - uses: actions/checkout@v5
 
-  test_mt:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: crystal-lang/install-crystal@v1
-      - run: make test CRFLAGS=-Dpreview_mt
+      - if: matrix.os != 'ubuntu-24.04-arm'
+        uses: crystal-lang/install-crystal@v1
+
+      # install-crystal doesn't support aarch64-linux (no official tarball)
+      - if: matrix.os == 'ubuntu-24.04-arm'
+        run: |
+          curl -fsSL https://packagecloud.io/84codes/crystal/gpgkey | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/84codes_crystal.gpg > /dev/null
+          . /etc/os-release
+          echo "deb https://packagecloud.io/84codes/crystal/$ID $VERSION_CODENAME main" | sudo tee /etc/apt/sources.list.d/84codes_crystal.list
+          sudo apt-get --quiet update
+          sudo apt-get --quiet --yes install crystal
+
+      - run: make test
+      - if: success() || failure()
+        run: make test CRFLAGS=-Dpreview_mt
+      - if: success() || failure()
+        run: make test CRFLAGS="-Dpreview_mt -Dexecution_context"
