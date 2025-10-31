@@ -337,19 +337,19 @@ module Minitest
     end
 
     private def reopen(src, dst, & : ->) : Nil
-      if (backup_fd = LibC.dup(src.fd)) == -1
-        raise IO::Error.from_errno("dup")
-      end
+      File.tempfile("bak") do |backup|
+        backup.reopen(src)
 
-      begin
-        src.reopen(dst)
-        yield
-        src.flush
-      ensure
-        if LibC.dup2(backup_fd, src.fd) == -1
-          raise IO::Error.from_errno("dup")
+        begin
+          src.reopen(dst)
+          yield
+          src.flush
+        ensure
+          src.reopen(backup)
+          backup.close
         end
-        LibC.close(backup_fd)
+      ensure
+        backup.delete
       end
     end
 
