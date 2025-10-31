@@ -33,6 +33,7 @@ jobs:
         - macos-latest
         - macos-15-intel
         - windows-latest
+      fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v5
