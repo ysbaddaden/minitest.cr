@@ -76,7 +76,7 @@ class AssertionsTest < Minitest::Test
     a = {code: 1, message: "some long message to force a line break in pretty inspect", status: "failed"}
     b = {code: 3, message: "some long message to force a line break in pretty inspect", status: "failed"}
     ex = assert_raises(Minitest::Assertion) { assert_equal a, b }
-    assert <<-PLAIN == ex.message
+    assert <<-PLAIN == p!(ex.message)
     --- expected
     +++ actual
     -{code: 1,

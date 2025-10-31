@@ -59,13 +59,18 @@ module Minitest
 
   module Assertions
     def diff(expected : String, actual : String) : String
+      p! expected
+      p! actual
       diff = Diff.line_diff(expected, actual)
+      p! diff
 
       String.build do |str|
         str << "--- expected\n"
         str << "+++ actual\n"
 
         diff.each do |delta|
+          p! delta
+
           case delta.type
           when .unchanged?
             delta.a.each { |i| str << ' ' << diff.a[i] << '\n' }
@@ -116,6 +121,7 @@ module Minitest
       msg = self.message(message) do
         if need_diff?(expected, actual)
           result = diff(expected, actual)
+          p! result
           if result.empty?
             "No visual difference found. Maybe expected class '#{expected.class.name}' isn't comparable to actual class '#{actual.class.name}' ?"
           else
@@ -125,6 +131,7 @@ module Minitest
           "Expected #{expected.inspect} but got #{actual.inspect}"
         end
       end
+      p! msg
       assert expected == actual, msg, file, line
     end
 
