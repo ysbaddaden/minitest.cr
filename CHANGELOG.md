@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v1.6.0
+
+Features:
+- Windows support by removing the POSIX `dup` calls with `IO#reopen`.
+- Support for `--color` and `--no-color`.
+- Resizes the default parallel exception context instead of starting a new
+  context when using Crystal 1.18+.
+- Added macOS, Windows and ARM targets on CI.
+
+Fixes:
+- Fixed the test suite on Windows.
+
+
 ## v1.5.0
 
 Features:
