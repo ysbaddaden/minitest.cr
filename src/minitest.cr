@@ -189,7 +189,7 @@ module Minitest
         .shuffle!(random)
         .each { |test| channel.send(test) }
     else
-      # shufle each suite, then shuffle tests for each suite:
+      # shuffle each suite, then shuffle tests for each suite:
       Runnable.runnables.shuffle!(random).each do |suite|
         suite
           .collect_tests

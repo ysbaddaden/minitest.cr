@@ -1,5 +1,5 @@
-# Original diff algorithm writen by TSUYUSATO Kitsune (MakeNowJust), distributed
-# under the MIT license.
+# Original diff algorithm written by TSUYUSATO Kitsune (MakeNowJust),
+# distributed under the MIT license.
 #
 # See <https://github.com/makenowjust/crystal-diff/blob/master/src/diff.cr>
 struct Minitest::Diff(T)
