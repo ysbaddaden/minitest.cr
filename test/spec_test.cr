@@ -19,7 +19,7 @@ describe Minitest::Spec do
 
   it("reports the original failure location") do
     ex = assert_raises(Minitest::Assertion) { assert false }
-    assert_equal("test/spec_test.cr:21", ex.__minitest_location)
+    assert_equal(Path.new("test", "spec_test.cr:21").to_s, ex.__minitest_location)
   end
 
   it "calls an instance method" do

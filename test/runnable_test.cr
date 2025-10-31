@@ -107,7 +107,11 @@ class RunnableTest < Minitest::Test
     stdout = execute("--verbose", pass: false)
     assert_match /ABCTest#test_error = [\d.]+ s = E/, stdout
     assert_match "Exception: oopsie\n", stdout
-    assert_match /test\/runnable_.+_test.cr:\d+:\d+ in 'test_error'/, stdout
+    {% if flag?(:windows) %}
+      assert_match /test\\runnable_.+_test.cr:\d+ in 'test_error'/, stdout
+    {% else %}
+      assert_match /test\/runnable_.+_test.cr:\d+:\d+ in 'test_error'/, stdout
+    {% end %}
   end
 
   def test_skip
