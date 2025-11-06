@@ -131,12 +131,16 @@ module Minitest
 
     {% if Fiber.has_constant?(:ExecutionContext) %}
       workers_count = Fiber::ExecutionContext.default_workers_count
-      {% if Fiber::ExecutionContext.has_method?(:resize) %}
-        execution_context = Fiber::ExecutionContext.current
-        execution_context.resize(workers_count)
-      {% else %}
-        execution_context = Fiber::ExecutionContext::MultiThreaded.new("MINITEST", workers_count)
-      {% end %}
+
+        {% if Fiber::ExecutionContext.has_constant?(:Parallel) %}
+          if (execution_context = Fiber::ExecutionContext.current).responds_to?(:resize)
+            execution_context.resize(workers_count)
+          else
+            execution_context = Fiber::ExecutionContext::Parallel.new("MINITEST", workers_count)
+          end
+        {% else %}
+          execution_context = Fiber::ExecutionContext::MultiThreaded.new("MINITEST", workers_count)
+        {% end %}
     {% end %}
 
     options.fibers.times do |i|
