@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.6.1
+
+Fixes:
+- Resizes the default parallel exception context instead of starting a new
+  context when using Crystal 1.18+ (didn't work in v1.6.0).
+
 ## v1.6.0
 
 Features:
@@ -11,7 +17,6 @@ Features:
 
 Fixes:
 - Fixed the test suite on Windows.
-
 
 ## v1.5.0
 
