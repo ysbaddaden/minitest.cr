@@ -36,6 +36,10 @@ class FocusTest < Minitest::Test
         it "shall not run" do
           refute true
         end
+
+        it "supports unicode: 汉语, 日本語, français, ...", focus: true do
+          skip
+        end
       end
       CRYSTAL
 
@@ -66,8 +70,9 @@ class FocusTest < Minitest::Test
 
     assert_match /Focus#test_shall_run = [\d.]+ s = \./, stdout
     refute_match /Focus#test_shall_not_run = [\d.]+ s = \./, stdout
+    assert_match /Focus#test_supports_unicode_汉语_日本語_français_ = [\d.]+ s = S/, stdout
 
-    assert_match "3 tests, 0 failures, 0 errors, 0 skips", stdout
+    assert_match "4 tests, 0 failures, 0 errors, 1 skip", stdout
   end
 
   def execute(*args, pass = true)

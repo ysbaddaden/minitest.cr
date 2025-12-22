@@ -9,7 +9,7 @@ module Minitest
     end
 
     macro it(name = "anonymous", focus = false, &block)
-      {% if focus %}focus{% end %} def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}
+      {% if focus %}focus{% end %} def test_{{ name.strip.gsub(/[^\p{L}\p{N}]+/, "_").id }}
         ret = {{ yield }}
       end
     end
