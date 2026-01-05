@@ -38,21 +38,12 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v5
-
-      - if: matrix.os != 'ubuntu-24.04-arm'
-        uses: crystal-lang/install-crystal@v1
-
-      # install-crystal doesn't support aarch64-linux (no official tarball)
-      - if: matrix.os == 'ubuntu-24.04-arm'
-        run: |
-          curl -fsSL https://packagecloud.io/84codes/crystal/gpgkey | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/84codes_crystal.gpg > /dev/null
-          . /etc/os-release
-          echo "deb https://packagecloud.io/84codes/crystal/$ID $VERSION_CODENAME main" | sudo tee /etc/apt/sources.list.d/84codes_crystal.list
-          sudo apt-get --quiet update
-          sudo apt-get --quiet --yes install crystal
+      - uses: crystal-lang/install-crystal@v1
 
       - run: make test
+
       - if: success() || failure()
         run: make test CRFLAGS=-Dpreview_mt
+
       - if: success() || failure()
         run: make test CRFLAGS="-Dpreview_mt -Dexecution_context"
