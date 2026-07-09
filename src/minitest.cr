@@ -131,28 +131,13 @@ module Minitest
 
     {% if Fiber.has_constant?(:ExecutionContext) %}
       workers_count = Fiber::ExecutionContext.default_workers_count
-
-        {% if Fiber::ExecutionContext.has_constant?(:Parallel) %}
-          if (execution_context = Fiber::ExecutionContext.current).responds_to?(:resize)
-            execution_context.resize(workers_count)
-          else
-            execution_context = Fiber::ExecutionContext::Parallel.new("MINITEST", workers_count)
-          end
-        {% else %}
-          execution_context = Fiber::ExecutionContext::MultiThreaded.new("MINITEST", workers_count)
-        {% end %}
+      Fiber::ExecutionContext.default.resize(maximum: workers_count)
     {% end %}
 
     options.fibers.times do |i|
-      {% if Fiber.has_constant?(:ExecutionContext) %}
-        execution_context.spawn(name: "minitest:worker-#{i}") do
-          worker_loop(channel, completed)
-        end
-      {% else %}
-        spawn(name: "minitest:worker-#{i}") do
-          worker_loop(channel, completed)
-        end
-      {% end %}
+      spawn(name: "minitest:worker-#{i}") do
+        worker_loop(channel, completed)
+      end
     end
     reporter.start
     randomize_and_run_tests(channel)
