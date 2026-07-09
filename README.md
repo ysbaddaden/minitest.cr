@@ -3,6 +3,22 @@
 Unit tests and assertions for the Crystal programming language, using the
 fantastic [minitest](https://github.com/seattlerb/minitest) as reference.
 
+The minitest rationale brings a number of benefits over stdlib `spec`:
+
+- Test suites (and `describe` blocks) are simple classes. Build a test suite
+  hierarchy, add methods and include modules without polluting the global
+  namespace, and don't impact other test suites.
+- One module per suite, not everything in a single module (faster codegen).
+- Simple assertions and `expect` expectations.
+
+Increase the trust in your program's correctness:
+
+- Test suites run **concurrently** to each others.
+- Test suites run in **parallel** to each others.
+- Tests run in **random** order by default — use seed for reproducible runs.
+- **Chaos mode** to flatten tests and randomize everything (full random, full
+  concurrent, full parallel).
+
 ## Getting Started
 
 Given that you'd like to test the following class:
