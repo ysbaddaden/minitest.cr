@@ -171,9 +171,3 @@ module Minitest
     end
   end
 end
-
-{% if !flag?(:mt_no_expectations) %}
-  class Object
-    include Minitest::Expectations
-  end
-{% end %}

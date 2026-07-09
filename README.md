@@ -60,23 +60,29 @@ describe Meme do
 
   describe "when asked about cheeseburgers" do
     it "must respond positively" do
-      meme.i_can_has_cheezburger?.must_equal("OHAI!")
+      expect(meme.i_can_has_cheezburger?).must_equal("OHAI!")
     end
   end
 
   describe "when asked about blending possibilities" do
     it "won't say no" do
-      meme.will_it_blend?.wont_match(/^no/i)
+      expect(meme.will_it_blend?).wont_match(/^no/i)
     end
   end
 end
 ```
 
-You may use assertions in your specs (they'll work the same) or you may prefer the `expect` syntax:
+You may use assertions in your specs (they're the same) or you may prefer to
+skip the `expect` syntax at the expense of polluting `Object` (legacy,
+discouraged):
 
 ```crystal
-expect(meme.i_can_haz_cheezeburger?).must_equal("OHAI!")
-expect(meme.will_it_blend?).wont_match(/^no/i)
+class Object
+  include Minitest::Expectations
+end
+
+meme.i_can_haz_cheezeburger?.must_equal("OHAI!")
+meme.will_it_blend?.wont_match(/^no/i)
 ```
 
 ### Run Tests
@@ -92,12 +98,6 @@ You may filter your tests using an exact test name, or a regexp:
 ```
 $ crystal run test/meme_test.cr -- -n test_that_kitty_can_eat
 $ crystal run test/meme_test.cr -- -n /will/
-```
-
-When using Minitest::Spec with assertions or the `expect` syntax, you can avoid to taint Object with all the `#must_` and `#wont_` expectations:
-
-```
-$ crystal run -Dmt_no_expectations spec/meme_spec.cr
 ```
 
 ## License
