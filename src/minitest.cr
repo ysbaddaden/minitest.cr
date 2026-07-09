@@ -10,7 +10,7 @@ module Minitest
   class Options
     property? chaos : Bool
     property? verbose : Bool
-    property fibers : Int32
+    property workers : Int32
     getter pattern : String | Regex | Nil
     getter seed : UInt32
     property? junit : String?
@@ -19,7 +19,11 @@ module Minitest
     def initialize
       @chaos = false
       @verbose = false
-      @fibers = 1
+      @workers = {% if Fiber.has_constant?(:ExecutionContext) %}
+                   Fiber::ExecutionContext.default_workers_count
+                 {% else %}
+                   1
+                 {% end %}
       @seed = ENV["SEED"]?.try(&.to_u32) || Random.rand(0_u32..0xFFFF_u32)
     end
 
@@ -47,10 +51,8 @@ module Minitest
         io << " --chaos"
       end
 
-      if fibers = @fibers
-        io << " --parallel "
-        fibers.to_s(io)
-      end
+      io << " --parallel "
+      @workers.to_s(io)
 
       if pattern = @pattern
         io << " --name "
@@ -94,8 +96,8 @@ module Minitest
         options.color = false
       end
 
-      opts.on("-p FIBERS", "--parallel FIBERS", "Parallelize runs.") do |fibers|
-        options.fibers = fibers.to_i
+      opts.on("-p COUNT", "--parallel COUNT", "Number of parallel workers (defaults to number of logical CPUs).") do |workers|
+        options.workers = workers.to_i.clamp(1..)
       end
 
       opts.on("-c", "--chaos", "Shuffle all tests from all test suites.") do
@@ -124,18 +126,19 @@ module Minitest
 
     Colorize.enabled = options.color?
 
-    channel = Channel(Array(Runnable::Data) | Runnable::Data).new(options.fibers * 4)
+    channel = Channel(Array(Runnable::Data) | Runnable::Data).new(options.workers * 4)
     wg = WaitGroup.new
 
-    # makes sure that reporter is initialized before spawning worker fibers:
+    # makes sure that reporter is initialized before spawning workers:
     raise "BUG: no minitest reporter" unless self.reporter
 
     {% if Fiber.has_constant?(:ExecutionContext) %}
-      workers_count = Fiber::ExecutionContext.default_workers_count
-      Fiber::ExecutionContext.default.resize(maximum: workers_count)
+      if options.workers > 1
+        Fiber::ExecutionContext.default.resize(options.workers)
+      end
     {% end %}
 
-    options.fibers.times do |i|
+    options.workers.times do |i|
       wg.spawn(name: "minitest:worker-#{i}") do
         worker_loop(channel)
       end

@@ -2,7 +2,7 @@
 
 CRYSTAL = crystal
 CRFLAGS =
-OPTS = --chaos --parallel 4 --verbose
+OPTS = --chaos --verbose
 
 test: .phony
 	$(CRYSTAL) run $(CRFLAGS) test/*_test.cr -- $(OPTS)
