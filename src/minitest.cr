@@ -81,15 +81,15 @@ module Minitest
         options.verbose = true
       end
 
-      opts.on("-j PATH", "--junit PATH", "Generate junit report") do |path|
+      opts.on("-j PATH", "--junit PATH", "Generate junit report.") do |path|
         options.junit = path
       end
 
-      opts.on("--color", "Enable ANSI colored output") do
+      opts.on("--color", "Enable ANSI colored output.") do
         options.color = true
       end
 
-      opts.on("--no-color", "Disable ANSI colored output") do
+      opts.on("--no-color", "Disable ANSI colored output.") do
         options.color = false
       end
 
