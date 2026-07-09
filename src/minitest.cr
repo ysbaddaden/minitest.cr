@@ -1,4 +1,5 @@
 require "option_parser"
+require "wait_group"
 require "./result"
 require "./reporter"
 require "./runnable"
@@ -124,7 +125,7 @@ module Minitest
     Colorize.enabled = options.color?
 
     channel = Channel(Array(Runnable::Data) | Runnable::Data).new(options.fibers * 4)
-    completed = Channel(Nil).new
+    wg = WaitGroup.new
 
     # makes sure that reporter is initialized before spawning worker fibers:
     raise "BUG: no minitest reporter" unless self.reporter
@@ -135,13 +136,13 @@ module Minitest
     {% end %}
 
     options.fibers.times do |i|
-      spawn(name: "minitest:worker-#{i}") do
-        worker_loop(channel, completed)
+      wg.spawn(name: "minitest:worker-#{i}") do
+        worker_loop(channel)
       end
     end
     reporter.start
     randomize_and_run_tests(channel)
-    options.fibers.times { completed.receive }
+    wg.wait
 
     reporter.report
     reporter.passed?
@@ -150,7 +151,7 @@ module Minitest
     reporter.passed?
   end
 
-  private def self.worker_loop(channel, completed) : Nil
+  private def self.worker_loop(channel) : Nil
     while value = channel.receive?
       case value
       in Array
@@ -163,7 +164,6 @@ module Minitest
         suite.new(reporter).run_one(name, proc)
       end
     end
-    completed.send(nil)
   end
 
   private def self.randomize_and_run_tests(channel) : Nil
