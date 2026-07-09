@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: crystal-lang/install-crystal@v1
-      - run: crystal tool format
+      - run: crystal tool format --check
 
   test:
     strategy:

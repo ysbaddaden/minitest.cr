@@ -1,7 +1,7 @@
 require "../src/autorun"
 
 class RunnableTest < Minitest::Test
-  MUTEX = Sync::Mutex.new
+  MUTEX       = Sync::Mutex.new
   BINARY_PATH = File.expand_path("runnable_#{Random::Secure.hex(3)}_test", __DIR__)
   SOURCE_PATH = BINARY_PATH + ".cr"
 
