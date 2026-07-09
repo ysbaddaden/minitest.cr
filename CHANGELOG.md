@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v1.6.2
+
+Fixes:
+- Support unicode in spec focus
+
 ## v1.6.1
 
 Fixes:
