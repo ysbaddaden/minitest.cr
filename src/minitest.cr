@@ -123,7 +123,7 @@ module Minitest
 
     Colorize.enabled = options.color?
 
-    channel = Channel(Array(Runnable::Data) | Runnable::Data | Nil).new(options.fibers * 4)
+    channel = Channel(Array(Runnable::Data) | Runnable::Data).new(options.fibers * 4)
     completed = Channel(Nil).new
 
     # makes sure that reporter is initialized before spawning worker fibers:
@@ -166,21 +166,19 @@ module Minitest
   end
 
   private def self.worker_loop(channel, completed) : Nil
-    loop do
-      case value = channel.receive?
-      when Array
+    while value = channel.receive?
+      case value
+      in Array
         value.each do |test|
           suite, name, proc = test
           suite.new(reporter).run_one(name, proc)
         end
-      when Runnable::Data
+      in Runnable::Data
         suite, name, proc = value
         suite.new(reporter).run_one(name, proc)
-      else
-        completed.send(nil)
-        break
       end
     end
+    completed.send(nil)
   end
 
   private def self.randomize_and_run_tests(channel) : Nil
