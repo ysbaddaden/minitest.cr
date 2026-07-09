@@ -1,6 +1,7 @@
 require "../src/autorun"
 
 class FocusTest < Minitest::Test
+  MUTEX = Sync::Mutex.new
   BINARY_PATH = File.expand_path("focus_#{Random::Secure.hex(3)}_test", __DIR__)
   SOURCE_PATH = BINARY_PATH + ".cr"
 
@@ -9,48 +10,52 @@ class FocusTest < Minitest::Test
       skip "Process doesn't work in the Crystal interpreter (the VM waits forever for SIGCHLD)"
     end
   {% else %}
-    begin
-      File.write(SOURCE_PATH, <<-CRYSTAL)
-      require "../src/autorun"
-      require "../src/focus"
+    def setup
+      MUTEX.synchronize do
+        return if File.exists?(BINARY_PATH)
 
-      class FocusTest < Minitest::Test
-        focus def test_will_run
+        File.write(SOURCE_PATH, <<-CRYSTAL)
+        require "../src/autorun"
+        require "../src/focus"
+
+        class FocusTest < Minitest::Test
+          focus def test_will_run
+          end
+
+          def test_wont_run
+          end
+
+          focus def test_will_also_run
+          end
+
+          def test_wont_run_too
+          end
         end
 
-        def test_wont_run
+        describe "Focus" do
+          it "shall run", focus: true do
+            assert true
+          end
+
+          it "shall not run" do
+            refute true
+          end
+
+          it "supports unicode: 汉语, 日本語, français, ...", focus: true do
+            skip
+          end
         end
+        CRYSTAL
 
-        focus def test_will_also_run
+        crystal = ENV.fetch("CRYSTAL", "crystal")
+        args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
+        stderr = IO::Memory.new
+
+        unless Process.run(crystal, args).success?
+          STDERR.puts "Failed to build focus test:"
+          STDERR.puts stderr.rewind.to_s
+          Minitest.exit(1)
         end
-
-        def test_wont_run_too
-        end
-      end
-
-      describe "Focus" do
-        it "shall run", focus: true do
-          assert true
-        end
-
-        it "shall not run" do
-          refute true
-        end
-
-        it "supports unicode: 汉语, 日本語, français, ...", focus: true do
-          skip
-        end
-      end
-      CRYSTAL
-
-      crystal = ENV.fetch("CRYSTAL", "crystal")
-      args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
-      stderr = IO::Memory.new
-
-      unless Process.run(crystal, args).success?
-        STDERR.puts "Failed to build focus test:"
-        STDERR.puts stderr.rewind.to_s
-        Minitest.exit(1)
       end
     end
 

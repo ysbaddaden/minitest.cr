@@ -1,6 +1,7 @@
 require "../src/autorun"
 
 class RunnableTest < Minitest::Test
+  MUTEX = Sync::Mutex.new
   BINARY_PATH = File.expand_path("runnable_#{Random::Secure.hex(3)}_test", __DIR__)
   SOURCE_PATH = BINARY_PATH + ".cr"
 
@@ -9,67 +10,71 @@ class RunnableTest < Minitest::Test
       skip "Process doesn't work in the Crystal interpreter (the VM waits forever for SIGCHLD)"
     end
   {% else %}
-    begin
-      File.write(SOURCE_PATH, <<-CRYSTAL)
-      require "../src/autorun"
+    def setup
+      MUTEX.synchronize do
+        return if File.exists?(BINARY_PATH)
 
-      class ABCTest < Minitest::Test
-        def test_success
-          assert true
+        File.write(SOURCE_PATH, <<-CRYSTAL)
+        require "../src/autorun"
+
+        class ABCTest < Minitest::Test
+          def test_success
+            assert true
+          end
+
+          def test_another_success
+            refute false
+          end
+
+          def test_error
+            raise "oopsie"
+          end
+
+          def test_skip
+            skip
+          end
+
+          def test_skip_message
+            skip "it doesn't work"
+          end
+
+          def test_skip_symbol
+            skip :not_implemented
+          end
+
+          def test_flunk
+            flunk
+          end
+
+          def test_flunk_message
+            flunk "it crashes randomly"
+          end
+
+          def test_flunk_symbol
+            flunk :todo
+          end
         end
 
-        def test_another_success
-          refute false
+        describe "ABC" do
+          it "success" do
+            assert true
+          end
+
+          it "fails" do
+            refute true
+          end
         end
+        CRYSTAL
 
-        def test_error
-          raise "oopsie"
+        crystal = ENV.fetch("CRYSTAL", "crystal")
+        args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
+        stderr = IO::Memory.new
+
+        unless Process.run(crystal, args).success?
+          STDERR.puts "Failed to build runnable test:"
+          STDERR.puts stderr.rewind.to_s
+          Minitest.exit(1)
         end
-
-        def test_skip
-          skip
-        end
-
-        def test_skip_message
-          skip "it doesn't work"
-        end
-
-        def test_skip_symbol
-          skip :not_implemented
-        end
-
-        def test_flunk
-          flunk
-        end
-
-        def test_flunk_message
-          flunk "it crashes randomly"
-        end
-
-        def test_flunk_symbol
-          flunk :todo
-        end
-      end
-
-      describe "ABC" do
-        it "success" do
-          assert true
-        end
-
-        it "fails" do
-          refute true
-        end
-      end
-      CRYSTAL
-
-      crystal = ENV.fetch("CRYSTAL", "crystal")
-      args = ["build", SOURCE_PATH, "-o", BINARY_PATH]
-      stderr = IO::Memory.new
-
-      unless Process.run(crystal, args).success?
-        STDERR.puts "Failed to build runnable test:"
-        STDERR.puts stderr.rewind.to_s
-        Minitest.exit(1)
       end
     end
 
